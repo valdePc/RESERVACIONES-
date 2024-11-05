@@ -23,7 +23,12 @@
             width: 300px;
         }
         h1 {
-            color: blue;
+            color: black;
+            margin-bottom: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
             margin-bottom: 20px;
         }
         input[type="password"] {
@@ -69,6 +74,7 @@
 </head>
 <body>
     <div class="container">
+        <img src="images/descarga.png" alt="Logo de Reservaciones">
         <h1>Acceso a Reservaciones</h1>
         <input type="password" id="password" placeholder="Ingresa la contraseña" required>
         <button onclick="verificarContraseña()">Ingresar</button>
