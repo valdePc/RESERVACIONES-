@@ -10,7 +10,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, #b3ffab, #12fff7);
+            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
             margin: 0;
             padding: 20px;
         }
@@ -24,25 +24,26 @@
             margin-bottom: 20px;
         }
         h1 {
-            color: #00796b;
+            color: #0066cc;
             text-align: center;
             margin-bottom: 20px;
         }
         .form-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 20px; /* Mayor separación entre campos */
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px; /* Espacio adicional entre filas */
         }
         .form-group {
-            flex: 1 1 200px; /* Ajuste flexible para cada widget */
+            flex: 1 1 200px;
             display: flex;
             flex-direction: column;
+            gap: 5px; /* Separación entre el label y el input */
         }
         label {
             font-size: 0.9rem;
-            margin-bottom: 5px;
+            color: #004d40;
         }
         input, textarea {
             padding: 10px;
@@ -55,20 +56,25 @@
         }
         input:focus, textarea:focus {
             outline: none;
-            border-color: #00796b;
-            box-shadow: 0 0 8px rgba(0, 121, 107, 0.3);
+            border-color: #0066cc;
+            box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
         }
         textarea {
             resize: vertical;
         }
         .availability {
-            color: #d32f2f;
-            margin-top: 10px;
-            text-align: center;
+            color: #ff6600;
             font-weight: bold;
+            font-size: 1.1rem;
+            margin: 20px 0; /* Espacio adicional alrededor del mensaje */
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #ff6600;
         }
         button {
-            background-color: #00796b;
+            background-color: #ff6600;
             color: white;
             padding: 10px 20px;
             margin-top: 10px;
@@ -81,7 +87,7 @@
             max-width: 200px;
         }
         button:hover {
-            background-color: #004d40;
+            background-color: #0066cc;
         }
         .button-group {
             display: flex;
@@ -102,88 +108,10 @@
             border: 1px solid #ddd;
         }
         th {
-            background-color: #00796b;
+            background-color: #0066cc;
             color: white;
         }
     </style>
-    <script>
-        const maxCapacity = 40;
-        let occupiedSpaces = 0;
-
-        document.addEventListener("DOMContentLoaded", () => {
-            // Establece la fecha de registro actual y desactiva edición
-            const fechaRegistro = document.getElementById("registroFecha");
-            fechaRegistro.value = new Date().toISOString().split("T")[0];
-            fechaRegistro.readOnly = true;
-
-            // Actualizar disponibilidad actual
-            verificarCapacidad();
-        });
-
-        function verificarCapacidad() {
-            const availableSpaces = maxCapacity - occupiedSpaces;
-            document.getElementById("availability").innerText = `Espacios ocupados: ${occupiedSpaces} / Disponibles: ${availableSpaces}`;
-            return occupiedSpaces < maxCapacity;
-        }
-
-        function validarFechas() {
-            const checkIn = new Date(document.getElementById("checkin").value);
-            const checkOut = new Date(document.getElementById("checkout").value);
-            if (checkOut < checkIn) {
-                alert("La fecha de Check-out no puede ser anterior a la fecha de Check-in.");
-                return false;
-            }
-            return true;
-        }
-
-        function registrarReserva() {
-            if (verificarCapacidad() && validarFechas()) {
-                const numero = parseInt(document.getElementById("numero").value);
-                
-                if (occupiedSpaces + numero <= maxCapacity) {
-                    occupiedSpaces += numero;
-                    verificarCapacidad();
-                    
-                    // Simulación de guardado en Airtable
-                    guardarEnAirtable();
-                    
-                    // Agregar la reserva a la tabla de visualización
-                    agregarReservaATabla();
-
-                    // Limpia el formulario después de registrar
-                    document.getElementById("reservaForm").reset();
-                } else {
-                    alert("No hay suficientes cupos disponibles para esta cantidad.");
-                }
-            }
-        }
-
-        function guardarEnAirtable() {
-            alert("Guardando datos en Airtable...");
-            // Lógica para guardar los datos en Airtable a través de una solicitud API
-            // Aquí se integraría la funcionalidad real con la API de Airtable
-        }
-
-        function mostrarEstado() {
-            document.querySelector(".table-container").style.display = "block";
-            // Aquí se implementaría la lógica para consultar Airtable
-            // y traer solo las reservas donde Check-out no ha expirado
-        }
-
-        function agregarReservaATabla() {
-            const table = document.getElementById("reservasTabla");
-            const nuevaFila = table.insertRow();
-
-            nuevaFila.insertCell(0).innerText = document.getElementById("registroFecha").value;
-            nuevaFila.insertCell(1).innerText = document.getElementById("checkin").value;
-            nuevaFila.insertCell(2).innerText = document.getElementById("checkout").value;
-            nuevaFila.insertCell(3).innerText = document.getElementById("locacion").value;
-            nuevaFila.insertCell(4).innerText = document.getElementById("numero").value;
-            nuevaFila.insertCell(5).innerText = document.getElementById("contacto").value;
-            nuevaFila.insertCell(6).innerText = document.getElementById("vuelo").value;
-            nuevaFila.insertCell(7).innerText = document.getElementById("comentario").value;
-        }
-    </script>
 </head>
 <body>
     <div class="container">
