@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda de Reservaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #b3ffab, #12fff7);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #00796b;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1 1 200px; /* Ajuste flexible para cada widget */
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s, border-color 0.3s;
+            width: 100%;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #00796b;
+            box-shadow: 0 0 8px rgba(0, 121, 107, 0.3);
+        }
+        textarea {
+            resize: vertical;
+        }
+        .availability {
+            color: #d32f2f;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        button {
+            background-color: #00796b;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+        }
+        button:hover {
+            background-color: #004d40;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .table-container {
+            margin-top: 20px;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #00796b;
+            color: white;
+        }
+    </style>
+    <script>
+        const maxCapacity = 40;
+        let occupiedSpaces = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // Establece la fecha de registro actual y desactiva edición
+            const fechaRegistro = document.getElementById("registroFecha");
+            fechaRegistro.value = new Date().toISOString().split("T")[0];
+            fechaRegistro.readOnly = true;
+
+            // Actualizar disponibilidad actual
+            verificarCapacidad();
+        });
+
+        function verificarCapacidad() {
+            const availableSpaces = maxCapacity - occupiedSpaces;
+            document.getElementById("availability").innerText = `Espacios ocupados: ${occupiedSpaces} / Disponibles: ${availableSpaces}`;
+            return occupiedSpaces < maxCapacity;
+        }
+
+        function validarFechas() {
+            const checkIn = new Date(document.getElementById("checkin").value);
+            const checkOut = new Date(document.getElementById("checkout").value);
+            if (checkOut < checkIn) {
+                alert("La fecha de Check-out no puede ser anterior a la fecha de Check-in.");
+                return false;
+            }
+            return true;
+        }
+
+        function registrarReserva() {
+            if (verificarCapacidad() && validarFechas()) {
+                const numero = parseInt(document.getElementById("numero").value);
+                
+                if (occupiedSpaces + numero <= maxCapacity) {
+                    occupiedSpaces += numero;
+                    verificarCapacidad();
+                    
+                    // Simulación de guardado en Airtable
+                    guardarEnAirtable();
+                    
+                    // Agregar la reserva a la tabla de visualización
+                    agregarReservaATabla();
+
+                    // Limpia el formulario después de registrar
+                    document.getElementById("reservaForm").reset();
+                } else {
+                    alert("No hay suficientes cupos disponibles para esta cantidad.");
+                }
+            }
+        }
+
+        function guardarEnAirtable() {
+            alert("Guardando datos en Airtable...");
+            // Lógica para guardar los datos en Airtable a través de una solicitud API
+            // Aquí se integraría la funcionalidad real con la API de Airtable
+        }
+
+        function mostrarEstado() {
+            document.querySelector(".table-container").style.display = "block";
+            // Aquí se implementaría la lógica para consultar Airtable
+            // y traer solo las reservas donde Check-out no ha expirado
+        }
+
+        function agregarReservaATabla() {
+            const table = document.getElementById("reservasTabla");
+            const nuevaFila = table.insertRow();
+
+            nuevaFila.insertCell(0).innerText = document.getElementById("registroFecha").value;
+            nuevaFila.insertCell(1).innerText = document.getElementById("checkin").value;
+            nuevaFila.insertCell(2).innerText = document.getElementById("checkout").value;
+            nuevaFila.insertCell(3).innerText = document.getElementById("locacion").value;
+            nuevaFila.insertCell(4).innerText = document.getElementById("numero").value;
+            nuevaFila.insertCell(5).innerText = document.getElementById("contacto").value;
+            nuevaFila.insertCell(6).innerText = document.getElementById("vuelo").value;
+            nuevaFila.insertCell(7).innerText = document.getElementById("comentario").value;
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Agenda de Reservaciones</h1>
+        <form id="reservaForm" onsubmit="registrarReserva(); return false;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="registroFecha">Fecha de registro</label>
+                    <input type="date" id="registroFecha" required readonly>
+                </div>
+                <div class="form-group">
+                    <label for="checkin">Check-in</label>
+                    <input type="date" id="checkin" required onchange="validarFechas()">
+                </div>
+                <div class="form-group">
+                    <label for="checkout">Check-out</label>
+                    <input type="date" id="checkout" required onchange="validarFechas()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="locacion">Locación NPH</label>
+                    <input type="text" id="locacion" placeholder="Ingrese la locación" required>
+                </div>
+                <div class="form-group">
+                    <label for="numero">Número de Cupos</label>
+                    <input type="number" id="numero" placeholder="Ingrese el número de cupos" required min="1">
+                </div>
+                <div class="form-group">
+                    <label for="contacto">Contacto</label>
+                    <input type="text" id="contacto" placeholder="Nombre del contacto" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vuelo">Vuelo</label>
+                    <input type="text" id="vuelo" placeholder="Número de vuelo">
+                </div>
+                <div class="form-group">
+                    <label for="comentario">Comentario</label>
+                    <textarea id="comentario" rows="2" placeholder="Escriba un comentario"></textarea>
+                </div>
+            </div>
+            <p id="availability" class="availability">Espacios ocupados: 0 / Disponibles: 40</p>
+            <div class="button-group">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="mostrarEstado()">Estado</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-container">
+        <h2>Estado de Reservaciones</h2>
+        <table id="reservasTabla">
+            <thead>
+                <tr>
+                    <th>Fecha de Registro</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Locación</th>
+                    <th>Número de Cupos</th>
+                    <th>Contacto</th>
+                    <th>Vuelo</th>
+                    <th>Comentario</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

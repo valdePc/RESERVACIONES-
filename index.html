@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso a Reservaciones</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 300px;
+        }
+        h1 {
+            color: blue;
+            margin-bottom: 20px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: orangered;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: blue;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+    <script>
+        function verificarContraseña() {
+            const contraseñasPermitidas = ["contraseña1", "contraseña2", "contraseña3"];
+            const contraseñaIngresada = document.getElementById("password").value;
+            const errorMensaje = document.getElementById("error");
+
+            if (contraseñasPermitidas.includes(contraseñaIngresada)) {
+                window.location.href = "agenda.html";
+            } else {
+                errorMensaje.style.display = "block";
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Acceso a Reservaciones</h1>
+        <input type="password" id="password" placeholder="Ingresa la contraseña" required>
+        <button onclick="verificarContraseña()">Ingresar</button>
+        <p id="error" class="error">Contraseña incorrecta. Inténtalo de nuevo.</p>
+    </div>
+</body>
+</html>
