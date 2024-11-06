@@ -31,15 +31,15 @@
         .form-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px; /* Mayor separación entre campos */
+            gap: 20px;
             align-items: center;
-            margin-bottom: 20px; /* Espacio adicional entre filas */
+            margin-bottom: 20px;
         }
         .form-group {
             flex: 1 1 200px;
             display: flex;
             flex-direction: column;
-            gap: 5px; /* Separación entre el label y el input */
+            gap: 5px;
         }
         label {
             font-size: 0.9rem;
@@ -66,7 +66,7 @@
             color: #ff6600;
             font-weight: bold;
             font-size: 1.1rem;
-            margin: 20px 0; /* Espacio adicional alrededor del mensaje */
+            margin: 20px 0;
             padding: 10px;
             background-color: #f0f8ff;
             border-radius: 8px;
@@ -112,6 +112,162 @@
             color: white;
         }
     </style>
+    <script>
+        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+        const baseId = 'appLJWGTQ6xFXTRDl';
+        const tableName = 'Reservas';
+        const maxCapacity = 40;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const fechaRegistro = document.getElementById("registroFecha");
+            fechaRegistro.value = new Date().toISOString().split("T")[0];
+            fechaRegistro.readOnly = true;
+            obtenerDatosReservas();
+        });
+
+        async function obtenerDatosReservas() {
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`
+                }
+            });
+            const data = await response.json();
+
+            const fechaActual = new Date().toISOString().split("T")[0];
+
+            const reservasVigentes = data.records
+                .map(record => record.fields)
+                .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual));
+
+            mostrarReservasEnTabla(reservasVigentes);
+
+            const occupiedSpaces = reservasVigentes
+                .filter(reserva => reserva.Entrada <= fechaActual && reserva.Salida >= fechaActual)
+                .reduce((acc, reserva) => acc + reserva['Número de Cupos'], 0);
+
+            verificarCapacidad(occupiedSpaces);
+        }
+
+        function verificarCapacidad(occupiedSpaces) {
+            const availableSpaces = maxCapacity - occupiedSpaces;
+            document.getElementById("availability").innerText = `Espacios ocupados hoy: ${occupiedSpaces} / Disponibles: ${availableSpaces}`;
+        }
+
+        async function guardarEnAirtable(reserva) {
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fields: reserva })
+                });
+
+                if (response.ok) {
+                    const jsonResponse = await response.json();
+                    console.log('Reserva guardada en Airtable:', jsonResponse);
+                    alert('Reserva guardada en Airtable exitosamente.');
+                    return true;
+                } else {
+                    console.error('Error al guardar en Airtable:', response.statusText);
+                    alert('Hubo un error al guardar la reserva.');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error al realizar la solicitud a Airtable:', error);
+                alert('Error al conectar con Airtable.');
+                return false;
+            }
+        }
+
+        function agregarReservaATabla(reserva) {
+            const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
+            const nuevaFila = tableBody.insertRow();
+
+            nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
+            nuevaFila.insertCell(1).innerText = reserva.Entrada;
+            nuevaFila.insertCell(2).innerText = reserva.Salida;
+            nuevaFila.insertCell(3).innerText = reserva['Locación'];
+            nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
+            nuevaFila.insertCell(5).innerText = reserva.Contacto;
+            nuevaFila.insertCell(6).innerText = reserva.Vuelo;
+            nuevaFila.insertCell(7).innerText = reserva.Comentario;
+        }
+
+        async function registrarReserva() {
+            const numero = parseInt(document.getElementById("numero").value);
+            const reserva = {
+                'Fecha de Registro': document.getElementById("registroFecha").value,
+                'Entrada': document.getElementById("Entrada").value,
+                'Salida': document.getElementById("Salida").value,
+                'Locación': document.getElementById("locacion").value,
+                'Número de Cupos': numero,
+                'Contacto': document.getElementById("contacto").value,
+                'Vuelo': document.getElementById("vuelo").value,
+                'Comentario': document.getElementById("comentario").value
+            };
+
+            if (await guardarEnAirtable(reserva)) {
+                agregarReservaATabla(reserva);
+
+                document.getElementById("Entrada").value = "";
+                document.getElementById("Salida").value = "";
+                document.getElementById("locacion").value = "";
+                document.getElementById("numero").value = "";
+                document.getElementById("contacto").value = "";
+                document.getElementById("vuelo").value = "";
+                document.getElementById("comentario").value = "";
+
+                obtenerDatosReservas();
+            }
+        }
+
+        async function mostrarEntradas() {
+            const reservas = await obtenerReservasDesdeAirtable();
+            const fechaActual = new Date();
+            const reservasVigentes = reservas.filter(reserva => new Date(reserva.Entrada) >= fechaActual);
+            mostrarReservasEnTabla(reservasVigentes);
+        }
+
+        async function mostrarSalidas() {
+            const reservas = await obtenerReservasDesdeAirtable();
+            const fechaActual = new Date();
+            const reservasCaducadas = reservas.filter(reserva => new Date(reserva.Entrada) < fechaActual);
+            mostrarReservasEnTabla(reservasCaducadas);
+        }
+
+        async function obtenerReservasDesdeAirtable() {
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`
+                }
+            });
+            const data = await response.json();
+            return data.records.map(record => record.fields);
+        }
+
+        function mostrarReservasEnTabla(reservasFiltradas) {
+            const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = "";
+
+            reservasFiltradas.forEach(reserva => {
+                const nuevaFila = tableBody.insertRow();
+
+                nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
+                nuevaFila.insertCell(1).innerText = reserva.Entrada;
+                nuevaFila.insertCell(2).innerText = reserva.Salida;
+                nuevaFila.insertCell(3).innerText = reserva['Locación'];
+                nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
+                nuevaFila.insertCell(5).innerText = reserva.Contacto;
+                nuevaFila.insertCell(6).innerText = reserva.Vuelo;
+                nuevaFila.insertCell(7).innerText = reserva.Comentario;
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -123,12 +279,12 @@
                     <input type="date" id="registroFecha" required readonly>
                 </div>
                 <div class="form-group">
-                    <label for="checkin">Check-in</label>
-                    <input type="date" id="checkin" required onchange="validarFechas()">
+                    <label for="Entrada">Entrada</label>
+                    <input type="date" id="Entrada" required>
                 </div>
                 <div class="form-group">
-                    <label for="checkout">Check-out</label>
-                    <input type="date" id="checkout" required onchange="validarFechas()">
+                    <label for="Salida">Salida</label>
+                    <input type="date" id="Salida" required>
                 </div>
             </div>
             <div class="form-row">
@@ -158,7 +314,9 @@
             <p id="availability" class="availability">Espacios ocupados: 0 / Disponibles: 40</p>
             <div class="button-group">
                 <button type="submit">Guardar</button>
-                <button type="button" onclick="mostrarEstado()">Estado</button>
+                <button type="button" onclick="mostrarEntradas()">Entrada</button>
+                <button type="button" onclick="mostrarSalidas()">Salida</button>
+                <button type="button" onclick="verificarDisponibilidad()">Disponibilidad</button>
             </div>
         </form>
     </div>
@@ -169,8 +327,8 @@
             <thead>
                 <tr>
                     <th>Fecha de Registro</th>
-                    <th>Check-in</th>
-                    <th>Check-out</th>
+                    <th>Entrada</th>
+                    <th>Salida</th>
                     <th>Locación</th>
                     <th>Número de Cupos</th>
                     <th>Contacto</th>

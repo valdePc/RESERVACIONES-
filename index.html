@@ -23,7 +23,7 @@
             width: 300px;
         }
         h1 {
-            color: black;
+            color: #136db0;
             margin-bottom: 20px;
         }
         img {
@@ -31,10 +31,10 @@
             height: auto;
             margin-bottom: 20px;
         }
-        input[type="password"] {
+        select, input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin: 15px 0;
+            margin: 10px 0;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
@@ -59,14 +59,54 @@
         }
     </style>
     <script>
-        function verificarContraseña() {
-            const contraseñasPermitidas = ["contraseña1", "contraseña2", "contraseña3"];
+        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+        const baseId = 'appLJWGTQ6xFXTRDl';
+        const tableName = 'Contraseñas';
+
+        document.addEventListener("DOMContentLoaded", cargarNombres);
+
+        async function cargarNombres() {
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`
+                }
+            });
+            const data = await response.json();
+
+            const nombresSelect = document.getElementById("nombres");
+            data.records.forEach(record => {
+                const option = document.createElement("option");
+                option.value = record.fields.Name;
+                option.textContent = record.fields.Name;
+                nombresSelect.appendChild(option);
+            });
+        }
+
+        async function verificarContraseña() {
+            const nombreSeleccionado = document.getElementById("nombres").value;
             const contraseñaIngresada = document.getElementById("password").value;
             const errorMensaje = document.getElementById("error");
 
-            if (contraseñasPermitidas.includes(contraseñaIngresada)) {
-                window.location.href = "agenda.html";
+            // Fetch the password from Airtable for the selected name
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula={Name}='${nombreSeleccionado}'`;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`
+                }
+            });
+            const data = await response.json();
+
+            if (data.records.length > 0) {
+                const contraseñaCorrecta = data.records[0].fields.Contraseña;
+                
+                if (contraseñaIngresada === contraseñaCorrecta) {
+                    window.location.href = "agenda.html";
+                } else {
+                    errorMensaje.style.display = "block";
+                }
             } else {
+                errorMensaje.textContent = "Usuario no encontrado. Inténtalo de nuevo.";
                 errorMensaje.style.display = "block";
             }
         }
@@ -76,8 +116,14 @@
     <div class="container">
         <img src="images/descarga.png" alt="Logo de Reservaciones">
         <h1>Acceso a Reservaciones</h1>
+        
+        <select id="nombres" required>
+            <option value="" disabled selected>Selecciona tu nombre</option>
+        </select>
+
         <input type="password" id="password" placeholder="Ingresa la contraseña" required>
         <button onclick="verificarContraseña()">Ingresar</button>
+        
         <p id="error" class="error">Contraseña incorrecta. Inténtalo de nuevo.</p>
     </div>
 </body>
