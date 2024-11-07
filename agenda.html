@@ -152,7 +152,7 @@
 
     function verificarCapacidad(occupiedSpaces) {
         const availableSpaces = maxCapacity - occupiedSpaces;
-        document.getElementById("availability").innerText = `Espacios ocupados hoy: ${occupiedSpaces} / Disponibles: ${availableSpaces}`;
+        document.getElementById("availability").innerText = `Espacios ocupados hoy: ${occupiedSpaces} / Espacios Disponibles: ${availableSpaces}`;
     }
 
     async function guardarEnAirtable(reserva) {
@@ -390,7 +390,7 @@ async function verificarDisponibilidad() {
             <div class="form-row">
                 <div class="form-group">
                     <label for="locacion">Ubicacion NPH</label>
-                    <input type="text" id="locacion" placeholder="Ingrese la locación" required>
+                    <input type="text" id="locacion" placeholder="Ingrese la Ubicacion" required>
                 </div>
                 <div class="form-group">
                     <label for="numero">Número de Cupos</label>
@@ -411,7 +411,7 @@ async function verificarDisponibilidad() {
                     <textarea id="comentario" rows="2" placeholder="Escriba un comentario"></textarea>
                 </div>
             </div>
-            <p id="availability" class="availability">Espacios ocupados: 0 / Disponibles: 40</p>
+            <p id="availability" class="availability">Espacios ocupados: 0 / Espacio Disponibles: 40</p>
             <div class="button-group">
                 <button type="submit">Guardar</button>
                 <button type="button" onclick="mostrarEntradas()">Entradas</button>
@@ -427,12 +427,12 @@ async function verificarDisponibilidad() {
         <table id="reservasTabla">
             <thead>
                 <tr>
-                    <th>Fecha de Registros</th>
+                    <th>Fecha de Registro</th>
                     <th>Entradas</th>
                     <th>Salidas</th>
                     <th>Ubicaciones (NPH)</th>
                     <th>Número de Cupos</th>
-                    <th>Contacto</th>
+                    <th>Contactos</th>
                     <th>Vuelos</th>
                     <th>Comentarios</th>
                 </tr>
