@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Datos - Estadísticas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> <!-- Librería para etiquetas -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 1200px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0066cc;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1 1 300px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h2 {
+            margin: 0;
+            font-size: 2rem;
+            color: #0066cc;
+        }
+
+        .stat-card p {
+            margin: 5px 0;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+        }
+
+        canvas {
+            max-width: 100%;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        td {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Estadísticas de Reservaciones</h1>
+        <!-- Resumen General -->
+        <div class="stats">
+            <div class="stat-card">
+                <h2 id="total-reservations">0</h2>
+                <p>Total de Reservaciones</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="current-occupancy">0</h2>
+                <p>Ocupación Actual</p>
+            </div>
+            <div class="stat-card">
+                <h2 id="avg-reservations">0</h2>
+                <p>Reservaciones Promedio por Día</p>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="chart-container">
+            <h2>Reservaciones por Mes</h2>
+            <canvas id="monthlyChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2>Cupos Ocupados por Ubicación</h2>
+            <canvas id="locationChart"></canvas>
+        </div>
+
+        <!-- Tabla Detallada -->
+        <div class="table-container">
+            <h2>Detalles de Reservaciones</h2>
+            <table id="reservationsTable">
+                <thead>
+                    <tr>
+                        <th>Fecha de Registro</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Ubicación</th>
+                        <th>Cupos</th>
+                        <th>Contacto</th>
+                        <th>Vuelo</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <div style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;">
+    <button onclick="history.back()" style="
+        background-color: #ff6600;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;">
+        Regresar
+    </button>
+</div>
+
+                    <!-- Los datos se agregarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+
+    <script>
+        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+        const baseId = 'appLJWGTQ6xFXTRDl';
+        const tableName = 'Reservas';
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const data = await fetchReservations();
+            updateStats(data);
+            renderTable(data);
+            renderCharts(data);
+        });
+
+        async function fetchReservations() {
+            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+            const response = await fetch(url, {
+                headers: {
+                    Authorization: `Bearer ${apiKey}`
+                }
+            });
+            const json = await response.json();
+            return json.records.map(record => record.fields);
+        }
+
+        function updateStats(data) {
+            const totalReservations = data.length;
+            const currentOccupancy = data.reduce((sum, item) => sum + (new Date(item.Salida) >= new Date() ? item['Número de Cupos'] : 0), 0);
+            const avgReservations = (totalReservations / (new Date().getDate())).toFixed(2);
+
+            document.getElementById("total-reservations").textContent = totalReservations;
+            document.getElementById("current-occupancy").textContent = currentOccupancy;
+            document.getElementById("avg-reservations").textContent = avgReservations;
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById("reservationsTable").querySelector("tbody");
+            tableBody.innerHTML = "";
+            data.forEach(item => {
+                const row = tableBody.insertRow();
+                row.insertCell().textContent = item['Fecha de Registro'] || "-";
+                row.insertCell().textContent = item.Entrada || "-";
+                row.insertCell().textContent = item.Salida || "-";
+                row.insertCell().textContent = item['Locación'] || "-";
+                row.insertCell().textContent = item['Número de Cupos'] || "-";
+                row.insertCell().textContent = item.Contacto || "-";
+                row.insertCell().textContent = item.Vuelo || "-";
+                row.insertCell().textContent = item.Comentario || "-";
+            });
+        }
+
+        function renderCharts(data) {
+    // Gráfico de Reservaciones por Mes
+    const months = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('es', { month: 'long' }));
+    const reservationsByMonth = Array(12).fill(0);
+    data.forEach(item => {
+        const month = new Date(item.Entrada).getMonth();
+        if (!isNaN(month)) reservationsByMonth[month]++;
+    });
+
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Reservaciones',
+                data: reservationsByMonth,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: 'Reservaciones por Mes' }
+            }
+        }
+    });
+
+    // Gráfico de Cupos por Ubicación con Porcentajes
+    const locations = {};
+    let totalCupos = 0;
+
+    // Filtrar datos válidos y calcular totales
+    data.forEach(item => {
+        if (item['Locación'] && item['Número de Cupos'] > 0) {
+            const location = item['Locación'];
+            const cupos = item['Número de Cupos'];
+            locations[location] = (locations[location] || 0) + cupos;
+            totalCupos += cupos;
+        }
+    });
+
+    // Verificar si hay datos válidos
+    if (totalCupos === 0) {
+        document.getElementById('locationChart').parentElement.innerHTML = "<p style='text-align:center; font-size:18px; color: red;'>No hay datos suficientes para mostrar el gráfico de Cupos Ocupados por Ubicación.</p>";
+        return;
+    }
+
+    new Chart(document.getElementById('locationChart'), {
+        type: 'pie',
+        data: {
+            labels: Object.keys(locations),
+            datasets: [{
+                label: 'Cupos',
+                data: Object.values(locations),
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const percentage = ((value / totalCupos) * 100).toFixed(2);
+                        return `${percentage}%`;
+                    },
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 14
+                    }
+                },
+                legend: { position: 'top' },
+                title: { display: true, text: 'Cupos Ocupados por Ubicación' }
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+}
+document.getElementById('backButton').addEventListener('click', () => {
+    // Intentar regresar a la página anterior
+    if (window.history.length > 1) {
+        history.back();
+    } else {
+        alert('No hay una página previa para regresar.');
+    }
+});
+
+    </script>
+</body>
+</html>

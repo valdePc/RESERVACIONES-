@@ -366,6 +366,27 @@ async function verificarDisponibilidad() {
             nuevaFila.insertCell(7).innerText = reserva.Comentario;
         });
     }
+    document.addEventListener("DOMContentLoaded", () => {
+    // Otros códigos que ya tienes, como inicializar la fecha
+    const fechaRegistro = document.getElementById("registroFecha");
+    fechaRegistro.value = new Date().toISOString().split("T")[0];
+    fechaRegistro.readOnly = true;
+    obtenerDatosReservas();
+
+    // Asignar evento click al botón después de que el DOM se cargue
+    document.getElementById('btnestadistica').addEventListener('click', () => {
+        const password = prompt("Ingrese la contraseña:");
+        const correctPassword = "123456"; // Contraseña correcta
+
+        if (password === correctPassword) {
+            window.location.href = "estadistica.html"; // Redirige a estadistica.html
+        } else {
+            alert("Contraseña incorrecta. Inténtelo nuevamente.");
+        }
+    });
+});
+
+
 </script>
 
 </head>
@@ -420,6 +441,24 @@ async function verificarDisponibilidad() {
             </div>
             
         </form>
+        <div style="text-align: center; margin-top: 50px;">
+            <button id="btnestadistica" style="
+                background-color: green; 
+                color: white; 
+                padding: 10px 20px; 
+                border: none; 
+                border-radius: 50px; 
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                cursor: pointer;
+                font-size: 16px;">
+                Estadística
+            </button>
+        </div>
+        
+        </div>
+        
+        </div>
+        
     </div>
 
     <div class="table-container">
