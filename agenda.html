@@ -112,18 +112,29 @@
             background-color: #0066cc;
             color: white;
         }
+        .highlight {
+            background-color: #ffeb3b;
+        }
+        
     </style>
 <script>
     const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
     const baseId = 'appLJWGTQ6xFXTRDl';
     const tableName = 'Reservas';
     const maxCapacity = 40;
+    let availableSpaces = maxCapacity;
 
     document.addEventListener("DOMContentLoaded", () => {
         const fechaRegistro = document.getElementById("registroFecha");
         fechaRegistro.value = new Date().toISOString().split("T")[0];
         fechaRegistro.readOnly = true;
         obtenerDatosReservas();
+
+        // Agregar evento al botón de Estadística
+        const btnEstadistica = document.getElementById("btnestadistica");
+        btnEstadistica.addEventListener("click", () => {
+            window.location.href = 'estadistica.html';
+        });
     });
 
     async function obtenerDatosReservas() {
@@ -139,20 +150,48 @@
 
         const reservasVigentes = data.records
             .map(record => record.fields)
-            .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual));
+            .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual))
+            .sort((a, b) => new Date(a.Entrada) - new Date(b.Entrada));
 
         mostrarReservasEnTabla(reservasVigentes);
 
         const occupiedSpaces = reservasVigentes
-            .filter(reserva => reserva.Entrada <= fechaActual && reserva.Salida >= fechaActual)
+            .filter(reserva => new Date(reserva.Entrada) <= new Date(fechaActual) && new Date(reserva.Salida) >= new Date(fechaActual))
             .reduce((acc, reserva) => acc + reserva['Número de Cupos'], 0);
 
         verificarCapacidad(occupiedSpaces);
     }
 
     function verificarCapacidad(occupiedSpaces) {
-        const availableSpaces = maxCapacity - occupiedSpaces;
+        availableSpaces = maxCapacity - occupiedSpaces;
         document.getElementById("availability").innerText = `Espacios ocupados hoy: ${occupiedSpaces} / Espacios Disponibles: ${availableSpaces}`;
+    }
+
+    async function registrarReserva() {
+        const numeroCupos = parseInt(document.getElementById("numero").value);
+
+        if (numeroCupos > availableSpaces) {
+            alert('No hay suficientes espacios disponibles para la cantidad de cupos solicitados.');
+            return;
+        }
+
+        const reserva = {
+            'Fecha de Registro': document.getElementById("registroFecha").value,
+            'Entrada': document.getElementById("Entrada").value,
+            'Salida': document.getElementById("Salida").value,
+            'Locación': document.getElementById("locacion").value,
+            'Número de Cupos': numeroCupos,
+            'Número de Personas': parseInt(document.getElementById("personas").value),
+            'Contacto': document.getElementById("contacto").value,
+            'Vuelo': document.getElementById("vuelo").value,
+            'Comentario': document.getElementById("comentario").value
+        };
+
+        if (await guardarEnAirtable(reserva)) {
+            agregarReservaATabla(reserva);
+            limpiarFormulario();
+            obtenerDatosReservas();
+        }
     }
 
     async function guardarEnAirtable(reserva) {
@@ -193,62 +232,159 @@
         nuevaFila.insertCell(2).innerText = reserva.Salida;
         nuevaFila.insertCell(3).innerText = reserva['Locación'];
         nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
-        nuevaFila.insertCell(5).innerText = reserva.Contacto;
-        nuevaFila.insertCell(6).innerText = reserva.Vuelo;
-        nuevaFila.insertCell(7).innerText = reserva.Comentario;
+        nuevaFila.insertCell(5).innerText = reserva['Número de Personas'];
+        nuevaFila.insertCell(6).innerText = reserva.Contacto;
+        nuevaFila.insertCell(7).innerText = reserva.Vuelo;
+        nuevaFila.insertCell(8).innerText = reserva.Comentario;
+
+        if (esReservaProxima(reserva.Entrada) || esReservaProxima(reserva.Salida)) {
+            nuevaFila.classList.add('highlight');
+        }
+
+        nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
     }
 
-    async function registrarReserva() {
-        const numero = parseInt(document.getElementById("numero").value);
-        const reserva = {
-            'Fecha de Registro': document.getElementById("registroFecha").value,
-            'Entrada': document.getElementById("Entrada").value,
-            'Salida': document.getElementById("Salida").value,
-            'Locación': document.getElementById("locacion").value,
-            'Número de Cupos': numero,
-            'Contacto': document.getElementById("contacto").value,
-            'Vuelo': document.getElementById("vuelo").value,
-            'Comentario': document.getElementById("comentario").value
+    function esReservaProxima(fecha) {
+        const fechaReserva = new Date(fecha);
+        const hoy = new Date();
+        const diferenciaDias = (fechaReserva - hoy) / (1000 * 60 * 60 * 24);
+        return diferenciaDias <= 3;
+    }
+
+    function cargarReservaEnFormulario(fila, reserva) {
+        document.getElementById("Entrada").value = reserva.Entrada;
+        document.getElementById("Salida").value = reserva.Salida;
+        document.getElementById("locacion").value = reserva['Locación'];
+        document.getElementById("numero").value = reserva['Número de Cupos'];
+        document.getElementById("personas").value = reserva['Número de Personas'];
+        document.getElementById("contacto").value = reserva.Contacto;
+        document.getElementById("vuelo").value = reserva.Vuelo;
+        document.getElementById("comentario").value = reserva.Comentario;
+
+        const guardarBtn = document.querySelector("button[type='submit']");
+        guardarBtn.onclick = (e) => {
+            e.preventDefault();
+            fila.cells[1].innerText = document.getElementById("Entrada").value;
+            fila.cells[2].innerText = document.getElementById("Salida").value;
+            fila.cells[3].innerText = document.getElementById("locacion").value;
+            fila.cells[4].innerText = document.getElementById("numero").value;
+            fila.cells[5].innerText = document.getElementById("personas").value;
+            fila.cells[6].innerText = document.getElementById("contacto").value;
+            fila.cells[7].innerText = document.getElementById("vuelo").value;
+            fila.cells[8].innerText = document.getElementById("comentario").value;
+            alert('Reserva actualizada correctamente.');
         };
-    
-        async function mostrarReservas(filtroTipo) {
-    const reservas = await obtenerReservasDesdeAirtable();
-    const fechaActual = new Date();
-    
-    const reservasFiltradas = reservas.filter(reserva => {
-        const fechaReserva = new Date(reserva.Entrada);
-        return filtroTipo === 'entrada' ? fechaReserva >= fechaActual : fechaReserva < fechaActual;
-    });
-    
-    mostrarReservasEnTabla(reservasFiltradas);
-}
+    }
 
-// Usar las funciones así:
+    function limpiarFormulario() {
+        document.getElementById("Entrada").value = "";
+        document.getElementById("Salida").value = "";
+        document.getElementById("locacion").value = "";
+        document.getElementById("numero").value = "";
+        document.getElementById("personas").value = "";
+        document.getElementById("contacto").value = "";
+        document.getElementById("vuelo").value = "";
+        document.getElementById("comentario").value = "";
+    }
 
-        const fechaReserva = reserva.Entrada;
-        const reservasPorFecha = await obtenerReservasPorFecha(fechaReserva);
-        const cuposOcupados = reservasPorFecha.reduce((acc, res) => acc + res['Número de Cupos'], 0);
-        const cuposDisponibles = maxCapacity - cuposOcupados;
+    async function mostrarEntradas() {
+        const reservas = await obtenerReservasDesdeAirtable();
+        const fechaActual = new Date();
 
-        if (numero > cuposDisponibles) {
-            const fechaDisponible = obtenerProximaFechaDisponible(numero);
-            alert(`La reserva no se puede completar. Hay ${cuposDisponibles} cupos disponibles en la fecha seleccionada. Próxima disponibilidad en: ${fechaDisponible.fecha} con ${fechaDisponible.cupos} cupos.`);
+        const reservasEntradas = reservas.filter(reserva => new Date(reserva.Entrada) >= fechaActual);
+        mostrarReservasEnTabla(reservasEntradas);
+    }
+
+    async function mostrarSalidas() {
+        const reservas = await obtenerReservasDesdeAirtable();
+        const fechaActual = new Date();
+
+        const reservasSalidas = reservas.filter(reserva => {
+            const fechaEntrada = new Date(reserva.Entrada);
+            const fechaSalida = new Date(reserva.Salida);
+            return fechaEntrada < fechaActual && fechaSalida >= fechaActual;
+        });
+        mostrarReservasEnTabla(reservasSalidas);
+    }
+
+    async function verificarDisponibilidad() {
+        // Función para verificar la disponibilidad basada en entradas de usuario
+        const fechaEntrada = prompt("Ingrese la fecha de entrada (YYYY-MM-DD):");
+        const fechaSalida = prompt("Ingrese la fecha de salida (YYYY-MM-DD):");
+        const cuposSolicitados = parseInt(prompt("Ingrese la cantidad de cupos que necesita:"));
+
+        if (!fechaEntrada || !fechaSalida || isNaN(cuposSolicitados)) {
+            alert("Fecha de entrada, fecha de salida o cantidad de cupos no válidos.");
             return;
         }
 
-        if (await guardarEnAirtable(reserva)) {
-            agregarReservaATabla(reserva);
+        const fechaInicio = new Date(fechaEntrada);
+        const fechaFin = new Date(fechaSalida);
+        let diasConDisponibilidad = [];
+        let diasSinDisponibilidad = [];
+        let enDisponibilidad = null;
 
-            document.getElementById("Entrada").value = "";
-            document.getElementById("Salida").value = "";
-            document.getElementById("locacion").value = "";
-            document.getElementById("numero").value = "";
-            document.getElementById("contacto").value = "";
-            document.getElementById("vuelo").value = "";
-            document.getElementById("comentario").value = "";
+        for (let fecha = fechaInicio; fecha <= fechaFin; fecha.setDate(fecha.getDate() + 1)) {
+            const fechaConsulta = fecha.toISOString().split('T')[0];
+            const reservasPorFecha = await obtenerReservasPorFecha(fechaConsulta);
+            const cuposOcupados = reservasPorFecha.reduce((acc, res) => acc + res['Número de Cupos'], 0);
+            const cuposDisponibles = maxCapacity - cuposOcupados;
 
-            obtenerDatosReservas();
+            if (cuposSolicitados <= cuposDisponibles) {
+                if (enDisponibilidad !== true) {
+                    diasConDisponibilidad.push([fechaConsulta]);
+                    enDisponibilidad = true;
+                } else {
+                    diasConDisponibilidad[diasConDisponibilidad.length - 1].push(fechaConsulta);
+                }
+            } else {
+                if (enDisponibilidad !== false) {
+                    diasSinDisponibilidad.push([fechaConsulta]);
+                    enDisponibilidad = false;
+                } else {
+                    diasSinDisponibilidad[diasSinDisponibilidad.length - 1].push(fechaConsulta);
+                }
+            }
         }
+
+        let mensaje = "";
+
+        diasConDisponibilidad.forEach(rango => {
+            const inicio = rango[0];
+            const fin = rango[rango.length - 1];
+            if (inicio === fin) {
+                mensaje += `El día ${inicio} hay disponibilidad suficiente.\n`;
+            } else {
+                mensaje += `Del ${inicio} al ${fin} hay disponibilidad suficiente.\n`;
+            }
+        });
+
+        diasSinDisponibilidad.forEach(rango => {
+            const inicio = rango[0];
+            const fin = rango[rango.length - 1];
+            if (inicio === fin) {
+                mensaje += `El día ${inicio} no hay disponibilidad suficiente.\n`;
+            } else {
+                mensaje += `Del ${inicio} al ${fin} no hay disponibilidad suficiente.\n`;
+            }
+        });
+
+        if (!mensaje) {
+            mensaje = "No se encontró disponibilidad para el rango de fechas especificado.";
+        }
+
+        alert(mensaje);
+    }
+
+    async function obtenerReservasPorFecha(fecha) {
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+        const response = await fetch(url, {
+            headers: {
+                Authorization: `Bearer ${apiKey}`
+            }
+        });
+        const data = await response.json();
+        return data.records.map(record => record.fields).filter(reserva => reserva.Entrada === fecha);
     }
 
     async function obtenerReservasDesdeAirtable() {
@@ -262,132 +398,16 @@
         return data.records.map(record => record.fields);
     }
 
-    async function mostrarEntradas() {
-        const reservas = await obtenerReservasDesdeAirtable();
-        const fechaActual = new Date();
-        
-        const reservasVigentes = reservas.filter(reserva => new Date(reserva.Entrada) >= fechaActual);
-        
-        mostrarReservasEnTabla(reservasVigentes);
-    }
-
-    async function mostrarSalidas() {
-    const reservas = await obtenerReservasDesdeAirtable();
-    const fechaActual = new Date();
-    
-    // Filtrar reservas donde la fecha de entrada ya haya caducado, pero la fecha de salida sigue vigente
-    const reservasValidas = reservas.filter(reserva => {
-        const fechaEntrada = new Date(reserva.Entrada);
-        const fechaSalida = new Date(reserva.Salida);
-        return fechaEntrada < fechaActual && fechaSalida >= fechaActual;
-    });
-    
-    mostrarReservasEnTabla(reservasValidas);
-}
-
-async function verificarDisponibilidad() {
-    const fechaEntrada = prompt("Ingrese la fecha de entrada (YYYY-MM-DD):");
-    const fechaSalida = prompt("Ingrese la fecha de salida (YYYY-MM-DD):");
-    const cuposSolicitados = parseInt(prompt("Ingrese la cantidad de cupos que necesita:"));
-    
-    if (!fechaEntrada || !fechaSalida || isNaN(cuposSolicitados)) {
-        alert("Fecha de entrada, fecha de salida o cantidad de cupos no válidos.");
-        return;
-    }
-    
-    const fechaInicio = new Date(fechaEntrada);
-    const fechaFin = new Date(fechaSalida);
-    const diasConDisponibilidad = [];
-    const diasSinDisponibilidad = [];
-
-    // Recorrer cada día en el rango de fechas
-    for (let fecha = fechaInicio; fecha <= fechaFin; fecha.setDate(fecha.getDate() + 1)) {
-        const fechaConsulta = fecha.toISOString().split('T')[0]; // Formatear fecha en YYYY-MM-DD
-        const reservasPorFecha = await obtenerReservasPorFecha(fechaConsulta); // Asumimos que esta función devuelve reservas para una fecha específica
-        const cuposOcupados = reservasPorFecha.reduce((acc, res) => acc + res['Número de Cupos'], 0);
-        const cuposDisponibles = maxCapacity - cuposOcupados;
-        
-        if (cuposSolicitados <= cuposDisponibles) {
-            diasConDisponibilidad.push(fechaConsulta);
-        } else {
-            diasSinDisponibilidad.push(fechaConsulta);
-        }
-    }
-
-    // Notificar al usuario los resultados
-    if (diasConDisponibilidad.length > 0) {
-        alert(`Para los días con disponibilidad: ${diasConDisponibilidad.join(", ")} hay cupos suficientes.`);
-    }
-    
-    if (diasSinDisponibilidad.length > 0) {
-        alert(`Para los días sin disponibilidad: ${diasSinDisponibilidad.join(", ")} no hay suficientes cupos.`);
-    }
-
-    if (diasConDisponibilidad.length === 0 && diasSinDisponibilidad.length === 0) {
-        alert("No se encontró disponibilidad para el rango de fechas especificado.");
-    }
-}
-
-    async function obtenerReservasPorFecha(fecha) {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${apiKey}`
-            }
-        });
-        const data = await response.json();
-        return data.records.map(record => record.fields).filter(reserva => reserva.Entrada === fecha);
-    }
-
-    function obtenerProximaFechaDisponible(cuposRequeridos) {
-        const fechaDisponible = new Date();
-        let cuposDisponibles = 0;
-        while (cuposDisponibles < cuposRequeridos) {
-            fechaDisponible.setDate(fechaDisponible.getDate() + 1);
-            cuposDisponibles = maxCapacity - Math.floor(Math.random() * maxCapacity);
-        }
-        return { fecha: fechaDisponible.toISOString().split("T")[0], cupos: cuposDisponibles };
-    }
-
     function mostrarReservasEnTabla(reservasFiltradas) {
         const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
         tableBody.innerHTML = "";
 
         reservasFiltradas.forEach(reserva => {
-            const nuevaFila = tableBody.insertRow();
-
-            nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
-            nuevaFila.insertCell(1).innerText = reserva.Entrada;
-            nuevaFila.insertCell(2).innerText = reserva.Salida;
-            nuevaFila.insertCell(3).innerText = reserva['Locación'];
-            nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
-            nuevaFila.insertCell(5).innerText = reserva.Contacto;
-            nuevaFila.insertCell(6).innerText = reserva.Vuelo;
-            nuevaFila.insertCell(7).innerText = reserva.Comentario;
+            agregarReservaATabla(reserva);
         });
     }
-    document.addEventListener("DOMContentLoaded", () => {
-    // Otros códigos que ya tienes, como inicializar la fecha
-    const fechaRegistro = document.getElementById("registroFecha");
-    fechaRegistro.value = new Date().toISOString().split("T")[0];
-    fechaRegistro.readOnly = true;
-    obtenerDatosReservas();
-
-    // Asignar evento click al botón después de que el DOM se cargue
-    document.getElementById('btnestadistica').addEventListener('click', () => {
-        const password = prompt("Ingrese la contraseña:");
-        const correctPassword = "123456"; // Contraseña correcta
-
-        if (password === correctPassword) {
-            window.location.href = "estadistica.html"; // Redirige a estadistica.html
-        } else {
-            alert("Contraseña incorrecta. Inténtelo nuevamente.");
-        }
-    });
-});
-
-
 </script>
+
 
 </head>
 <body>
@@ -418,6 +438,10 @@ async function verificarDisponibilidad() {
                     <input type="number" id="numero" placeholder="Ingrese el número de cupos" required min="1">
                 </div>
                 <div class="form-group">
+                    <label for="personas">Número de Personas</label>
+                    <input type="number" id="personas" placeholder="Ingrese el número de personas" required min="1">
+                </div>
+                <div class="form-group">
                     <label for="contacto">Contacto</label>
                     <input type="text" id="contacto" placeholder="Nombre del contacto" required>
                 </div>
@@ -439,6 +463,11 @@ async function verificarDisponibilidad() {
                 <button type="button" onclick="mostrarSalidas()">Salidas</button>
                 <button type="button" onclick="verificarDisponibilidad()">Disponibilidad</button>
             </div>
+            <div id="estadisticaSection" class="container" style="display: none;">
+                <h1>Estadísticas de Reservaciones</h1>
+                <p>Aquí podrás ver las estadísticas detalladas de las reservas realizadas.</p>
+                <!-- Agrega más contenido o gráficos de estadísticas según sea necesario -->
+            </div>
             
         </form>
         <div style="text-align: center; margin-top: 50px;">
@@ -454,11 +483,6 @@ async function verificarDisponibilidad() {
                 Estadística
             </button>
         </div>
-        
-        </div>
-        
-        </div>
-        
     </div>
 
     <div class="table-container">
@@ -471,6 +495,7 @@ async function verificarDisponibilidad() {
                     <th>Salidas</th>
                     <th>Ubicaciones (NPH)</th>
                     <th>Número de Cupos</th>
+                    <th>Número de Personas</th>
                     <th>Contactos</th>
                     <th>Vuelos</th>
                     <th>Comentarios</th>
