@@ -115,6 +115,17 @@
         .highlight {
             background-color: #ffeb3b;
         }
+        .highlight-entrada {
+    background-color: #c8e6c9;#ffcdd2; /* Verde claro */
+    font-weight: bold;
+}
+
+.highlight-salida {
+    background-color: #ffcdd2; /* Rojo claro */
+    font-weight: bold;
+}
+
+
         
     </style>
 <script>
@@ -125,42 +136,53 @@
     let availableSpaces = maxCapacity;
 
     document.addEventListener("DOMContentLoaded", () => {
-        const fechaRegistro = document.getElementById("registroFecha");
-        fechaRegistro.value = new Date().toISOString().split("T")[0];
-        fechaRegistro.readOnly = true;
-        obtenerDatosReservas();
+    const fechaRegistro = document.getElementById("registroFecha");
+    fechaRegistro.value = new Date().toISOString().split("T")[0];
+    fechaRegistro.readOnly = true;
+    obtenerDatosReservas();
 
-        // Agregar evento al botón de Estadística
-        const btnEstadistica = document.getElementById("btnestadistica");
-        btnEstadistica.addEventListener("click", () => {
-            window.location.href = 'estadistica.html';
-        });
+    // Agregar evento al botón de Estadística con contraseña
+    const btnEstadistica = document.getElementById("btnestadistica");
+    btnEstadistica.addEventListener("click", () => {
+        const password = prompt("Ingrese la contraseña para acceder a Estadística:");
+        if (password === "123456") {
+            window.location.href = 'estadistica.html'; // Cambia este enlace si es necesario
+        } else {
+            alert("Contraseña incorrecta. Acceso denegado.");
+        }
     });
+});
 
-    async function obtenerDatosReservas() {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${apiKey}`
-            }
-        });
-        const data = await response.json();
+        
 
-        const fechaActual = new Date().toISOString().split("T")[0];
+async function obtenerDatosReservas() {
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${apiKey}`
+        }
+    });
+    const data = await response.json();
 
-        const reservasVigentes = data.records
-            .map(record => record.fields)
-            .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual))
-            .sort((a, b) => new Date(a.Entrada) - new Date(b.Entrada));
+    const fechaActual = new Date().toISOString().split("T")[0];
 
-        mostrarReservasEnTabla(reservasVigentes);
+    const reservasVigentes = data.records
+        .map(record => ({
+            ...record.fields,
+            id: record.id // Agregar el ID del registro
+        }))
+        .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual))
+        .sort((a, b) => new Date(a.Entrada) - new Date(b.Entrada));
 
-        const occupiedSpaces = reservasVigentes
-            .filter(reserva => new Date(reserva.Entrada) <= new Date(fechaActual) && new Date(reserva.Salida) >= new Date(fechaActual))
-            .reduce((acc, reserva) => acc + reserva['Número de Cupos'], 0);
+    mostrarReservasEnTabla(reservasVigentes);
 
-        verificarCapacidad(occupiedSpaces);
-    }
+    const occupiedSpaces = reservasVigentes
+        .filter(reserva => new Date(reserva.Entrada) <= new Date(fechaActual) && new Date(reserva.Salida) >= new Date(fechaActual))
+        .reduce((acc, reserva) => acc + reserva['Número de Cupos'], 0);
+
+    verificarCapacidad(occupiedSpaces);
+}
+
 
     function verificarCapacidad(occupiedSpaces) {
         availableSpaces = maxCapacity - occupiedSpaces;
@@ -222,27 +244,35 @@
             return false;
         }
     }
-
     function agregarReservaATabla(reserva) {
-        const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
-        const nuevaFila = tableBody.insertRow();
+    const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
+    const nuevaFila = tableBody.insertRow();
 
-        nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
-        nuevaFila.insertCell(1).innerText = reserva.Entrada;
-        nuevaFila.insertCell(2).innerText = reserva.Salida;
-        nuevaFila.insertCell(3).innerText = reserva['Locación'];
-        nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
-        nuevaFila.insertCell(5).innerText = reserva['Número de Personas'];
-        nuevaFila.insertCell(6).innerText = reserva.Contacto;
-        nuevaFila.insertCell(7).innerText = reserva.Vuelo;
-        nuevaFila.insertCell(8).innerText = reserva.Comentario;
+    // Almacenar el ID del registro en un atributo de datos
+    nuevaFila.setAttribute('data-id', reserva.id);
 
-        if (esReservaProxima(reserva.Entrada) || esReservaProxima(reserva.Salida)) {
-            nuevaFila.classList.add('highlight');
-        }
+    nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
+    nuevaFila.insertCell(1).innerText = reserva.Entrada;
+    nuevaFila.insertCell(2).innerText = reserva.Salida;
+    nuevaFila.insertCell(3).innerText = reserva['Locación'];
+    nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
+    nuevaFila.insertCell(5).innerText = reserva['Número de Personas'];
+    nuevaFila.insertCell(6).innerText = reserva.Contacto;
+    nuevaFila.insertCell(7).innerText = reserva.Vuelo;
+    nuevaFila.insertCell(8).innerText = reserva.Comentario;
 
-        nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
+    // Verificar si la reserva está próxima para Entrada y Salida
+    if (esReservaProxima(reserva.Entrada)) {
+        nuevaFila.classList.add('highlight-entrada'); // Clase para resaltar llegada
     }
+    if (esReservaProxima(reserva.Salida)) {
+        nuevaFila.classList.add('highlight-salida'); // Clase para resaltar salida
+    }
+
+    nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
+}
+
+
 
     function esReservaProxima(fecha) {
         const fechaReserva = new Date(fecha);
@@ -252,29 +282,85 @@
     }
 
     function cargarReservaEnFormulario(fila, reserva) {
-        document.getElementById("Entrada").value = reserva.Entrada;
-        document.getElementById("Salida").value = reserva.Salida;
-        document.getElementById("locacion").value = reserva['Locación'];
-        document.getElementById("numero").value = reserva['Número de Cupos'];
-        document.getElementById("personas").value = reserva['Número de Personas'];
-        document.getElementById("contacto").value = reserva.Contacto;
-        document.getElementById("vuelo").value = reserva.Vuelo;
-        document.getElementById("comentario").value = reserva.Comentario;
+    document.getElementById("Entrada").value = reserva.Entrada;
+    document.getElementById("Salida").value = reserva.Salida;
+    document.getElementById("locacion").value = reserva['Locación'];
+    document.getElementById("numero").value = reserva['Número de Cupos'];
+    document.getElementById("personas").value = reserva['Número de Personas'];
+    document.getElementById("contacto").value = reserva.Contacto;
+    document.getElementById("vuelo").value = reserva.Vuelo;
+    document.getElementById("comentario").value = reserva.Comentario;
 
-        const guardarBtn = document.querySelector("button[type='submit']");
-        guardarBtn.onclick = (e) => {
-            e.preventDefault();
-            fila.cells[1].innerText = document.getElementById("Entrada").value;
-            fila.cells[2].innerText = document.getElementById("Salida").value;
-            fila.cells[3].innerText = document.getElementById("locacion").value;
-            fila.cells[4].innerText = document.getElementById("numero").value;
-            fila.cells[5].innerText = document.getElementById("personas").value;
-            fila.cells[6].innerText = document.getElementById("contacto").value;
-            fila.cells[7].innerText = document.getElementById("vuelo").value;
-            fila.cells[8].innerText = document.getElementById("comentario").value;
-            alert('Reserva actualizada correctamente.');
+    const guardarBtn = document.querySelector("button[type='submit']");
+    guardarBtn.onclick = async (e) => {
+        e.preventDefault();
+
+        const reservaActualizada = {
+            'Entrada': document.getElementById("Entrada").value,
+            'Salida': document.getElementById("Salida").value,
+            'Locación': document.getElementById("locacion").value,
+            'Número de Cupos': parseInt(document.getElementById("numero").value),
+            'Número de Personas': parseInt(document.getElementById("personas").value),
+            'Contacto': document.getElementById("contacto").value,
+            'Vuelo': document.getElementById("vuelo").value,
+            'Comentario': document.getElementById("comentario").value
         };
-    }
+
+        // Recuperar el ID desde el atributo data-id de la fila seleccionada
+        const idReserva = fila.getAttribute('data-id');
+
+        if (!idReserva) {
+            console.error("ID del registro no encontrado");
+            alert("No se puede actualizar, ID no encontrado.");
+            return;
+        }
+
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${idReserva}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fields: reservaActualizada })
+            });
+
+            if (response.ok) {
+                alert('Reserva actualizada correctamente en Airtable.');
+
+                fila.cells[1].innerText = reservaActualizada.Entrada || '';
+                fila.cells[2].innerText = reservaActualizada.Salida || '';
+                fila.cells[3].innerText = reservaActualizada['Locación'] || '';
+                fila.cells[4].innerText = reservaActualizada['Número de Cupos'] || '';
+                fila.cells[5].innerText = reservaActualizada['Número de Personas'] || '';
+                fila.cells[6].innerText = reservaActualizada.Contacto || '';
+                fila.cells[7].innerText = reservaActualizada.Vuelo || '';
+                fila.cells[8].innerText = reservaActualizada.Comentario || '';
+            } else {
+                console.error('Error al actualizar en Airtable:', response.statusText);
+                alert('Hubo un error al actualizar la reserva.');
+            }
+        } catch (error) {
+            console.error('Error al conectar con Airtable:', error);
+            alert('Error al conectar con Airtable.');
+        }
+        function esReservaProxima(fecha) {
+    const fechaReserva = new Date(fecha);
+    const hoy = new Date();
+    const diferenciaDias = (fechaReserva - hoy) / (1000 * 60 * 60 * 24); // Convertir milisegundos a días
+    return diferenciaDias >= 0 && diferenciaDias <= 3; // Dentro de los próximos 3 días
+    
+}
+
+    };
+}
+
+
+
+
+
 
     function limpiarFormulario() {
         document.getElementById("Entrada").value = "";
@@ -407,7 +493,6 @@
         });
     }
 </script>
-
 
 </head>
 <body>
