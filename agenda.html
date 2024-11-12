@@ -1,141 +1,178 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agenda de Reservaciones</title>
-    <style>
-        /* Estilos generales */
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            max-width: 1000px;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #0066cc;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            flex: 1 1 200px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        label {
-            font-size: 0.9rem;
-            color: #004d40;
-        }
-        input, textarea {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s, border-color 0.3s;
-            width: 100%;
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #136db0;
-            box-shadow: 0 0 8px rgba(0, 102, 204, 0.3);
-        }
-        textarea {
-            resize: vertical;
-        }
-        .availability {
-            color: #ff6600;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin: 20px 0;
-            padding: 10px;
-            background-color: #f0f8ff;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #ff6600;
-        }
-        button {
-            background-color: #ff6600;
-            color: white;
-            padding: 10px 20px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            max-width: 200px;
-        }
-        button:hover {
-            background-color: #0066cc;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .table-container {
-            margin-top: 20px;
-            width: 100%;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #0066cc;
-            color: white;
-        }
-        .highlight {
-            background-color: #ffeb3b;
-        }
-        .highlight-entrada {
-    background-color: #c8e6c9;#ffcdd2; /* Verde claro */
-    font-weight: bold;
-}
+<style>
+    /* Estilos generales */
+    body {
+        font-family: 'Arial', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: linear-gradient(135deg, #74ebd5, #acb6e5);
+        margin: 0;
+        padding: 20px;
+        color: #333;
+    }
 
-.highlight-salida {
-    background-color: #ffcdd2; /* Rojo claro */
-    font-weight: bold;
-}
+    .container {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        width: 100%;
+        margin-bottom: 30px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+        color: #004aad;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        flex: 1 1 200px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    label {
+        font-size: 1rem;
+        color: #333;
+        font-weight: bold;
+    }
+
+    input, textarea {
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    input:focus, textarea:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+    .availability {
+        color: #e65100;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #fff4e6;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #ff9800;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    button {
+        background: linear-gradient(90deg, #ff5722, #ff9800);
+        color: white;
+        padding: 12px 25px;
+        margin-top: 15px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 200px;
+    }
+
+    button:hover {
+        background: linear-gradient(90deg, #ff9800, #ff5722);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .table-container {
+        margin-top: 30px;
+        width: 100%;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+        padding: 15px;
+        border-bottom: 1px solid #f1f1f1;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    th {
+        background-color: #004aad;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    .highlight {
+        background-color: #ffeb3b;
+    }
+
+    .highlight-entrada {
+        background-color: #d4edda; /* Verde claro */
+        font-weight: bold;
+    }
+
+    .highlight-salida {
+        background-color: #f8d7da; /* Rojo claro */
+        font-weight: bold;
+    }
+</style>
 
 
-        
-    </style>
+    
 <script>
-    const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-    const baseId = 'appLJWGTQ6xFXTRDl';
-    const tableName = 'Reservas';
-    const maxCapacity = 40;
-    let availableSpaces = maxCapacity;
+const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+const baseId = 'appLJWGTQ6xFXTRDl';
+const tableName = 'Reservas';
+const maxCapacity = 40;
+let availableSpaces = maxCapacity;
 
-    document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const fechaRegistro = document.getElementById("registroFecha");
     fechaRegistro.value = new Date().toISOString().split("T")[0];
     fechaRegistro.readOnly = true;
@@ -151,7 +188,19 @@
             alert("Contraseña incorrecta. Acceso denegado.");
         }
     });
+
+    // Agregar evento al botón de BDD con contraseña
+    const btnBDD = document.getElementById("btnBDD");
+    btnBDD.addEventListener("click", () => {
+        const password = prompt("Ingrese la contraseña para acceder a BDD:");
+        if (password === "123456") { // Cambia la contraseña según sea necesario
+            window.location.href = 'https://airtable.com/appLJWGTQ6xFXTRDl/tblM4Q3dJjFg2DG97/viwhmRh1lHOFtEqQv?blocks=hide';
+        } else {
+            alert("Contraseña incorrecta. Acceso denegado.");
+        }
+    });
 });
+
 
         
 
@@ -171,17 +220,24 @@ async function obtenerDatosReservas() {
             ...record.fields,
             id: record.id // Agregar el ID del registro
         }))
-        .filter(reserva => new Date(reserva.Salida) >= new Date(fechaActual))
+        .filter(reserva => 
+            new Date(reserva.Salida) >= new Date(fechaActual) && // Excluir reservas vencidas
+            reserva.Eliminados !== "Eliminado" // Excluir reservas eliminadas
+        )
         .sort((a, b) => new Date(a.Entrada) - new Date(b.Entrada));
 
     mostrarReservasEnTabla(reservasVigentes);
 
     const occupiedSpaces = reservasVigentes
-        .filter(reserva => new Date(reserva.Entrada) <= new Date(fechaActual) && new Date(reserva.Salida) >= new Date(fechaActual))
-        .reduce((acc, reserva) => acc + reserva['Número de Cupos'], 0);
+        .filter(reserva => 
+            new Date(reserva.Entrada) <= new Date(fechaActual) && 
+            new Date(reserva.Salida) >= new Date(fechaActual)
+        )
+        .reduce((acc, reserva) => acc + (reserva['Número de Cupos'] || 0), 0);
 
     verificarCapacidad(occupiedSpaces);
 }
+
 
 
     function verificarCapacidad(occupiedSpaces) {
@@ -269,8 +325,28 @@ async function obtenerDatosReservas() {
         nuevaFila.classList.add('highlight-salida'); // Clase para resaltar salida
     }
 
+    // Crear botón de eliminar
+    const botonEliminar = document.createElement("button");
+    botonEliminar.innerText = "Eliminar";
+    botonEliminar.style.backgroundColor = "red";
+    botonEliminar.style.color = "white";
+    botonEliminar.style.border = "none";
+    botonEliminar.style.padding = "5px 10px";
+    botonEliminar.style.borderRadius = "5px";
+    botonEliminar.style.cursor = "pointer";
+
+    // Manejar la eliminación
+    botonEliminar.addEventListener("click", () => {
+        if (confirm("¿Estás seguro de que deseas eliminar esta reserva?")) {
+            marcarComoEliminado(reserva.id);
+        }
+    });
+
+    nuevaFila.insertCell(9).appendChild(botonEliminar);
+
     nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
 }
+
 
 
 
@@ -492,6 +568,44 @@ async function obtenerDatosReservas() {
             agregarReservaATabla(reserva);
         });
     }
+    async function marcarComoEliminado(reservaId) {
+    if (!reservaId) {
+        console.error("ID de la reserva no proporcionado.");
+        return;
+    }
+
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${reservaId}`;
+    const body = {
+        fields: {
+            Eliminados: "Eliminado" // Asegúrate de usar el nombre exacto de la opción en Airtable
+        }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+            alert("Reserva marcada como eliminada en Airtable.");
+            console.log("Actualización exitosa:", await response.json());
+        } else {
+            const errorDetails = await response.json();
+            console.error("Error al marcar como eliminado:", errorDetails);
+            alert("No se pudo marcar como eliminada. Verifica los detalles en la consola.");
+        }
+    } catch (error) {
+        console.error("Error al conectar con Airtable:", error);
+        alert("Error al conectar con Airtable para marcar como eliminado.");
+    }
+}
+
+
 </script>
 
 </head>
@@ -567,6 +681,18 @@ async function obtenerDatosReservas() {
                 font-size: 16px;">
                 Estadística
             </button>
+
+            <button id="btnBDD" style="
+            background-color: blue; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 50px; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            font-size: 16px;">
+            BDD
+        </button>
         </div>
     </div>
 
