@@ -199,6 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Contraseña incorrecta. Acceso denegado.");
         }
     });
+    document.getElementById("btnTransporte").addEventListener("click", () => {
+    window.location.href = 'transporte.html';
+});
+
 });
 
 
@@ -304,12 +308,20 @@ async function obtenerDatosReservas() {
     const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
     const nuevaFila = tableBody.insertRow();
 
+    // Función para formatear fechas a DD/MM/AA
+    const formatearFecha = (fecha) => {
+        if (!fecha) return ""; // Manejar fechas vacías
+        const [year, month, day] = fecha.split("-");
+        return `${day}/${month}/${year.slice(-2)}`;
+    };
+
     // Almacenar el ID del registro en un atributo de datos
     nuevaFila.setAttribute('data-id', reserva.id);
 
-    nuevaFila.insertCell(0).innerText = reserva['Fecha de Registro'];
-    nuevaFila.insertCell(1).innerText = reserva.Entrada;
-    nuevaFila.insertCell(2).innerText = reserva.Salida;
+    // Insertar celdas con datos formateados
+    nuevaFila.insertCell(0).innerText = formatearFecha(reserva['Fecha de Registro']);
+    nuevaFila.insertCell(1).innerText = formatearFecha(reserva.Entrada);
+    nuevaFila.insertCell(2).innerText = formatearFecha(reserva.Salida);
     nuevaFila.insertCell(3).innerText = reserva['Locación'];
     nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
     nuevaFila.insertCell(5).innerText = reserva['Número de Personas'];
@@ -338,17 +350,21 @@ async function obtenerDatosReservas() {
     // Manejar la eliminación
     botonEliminar.addEventListener("click", () => {
         if (confirm("¿Estás seguro de que deseas eliminar esta reserva?")) {
-            marcarComoEliminado(reserva.id);
+            const idReserva = reserva.id; // ID de la reserva
+            if (idReserva) {
+                marcarComoEliminado(idReserva); // Marcar como eliminado en Airtable
+            }
+            nuevaFila.remove(); // Eliminar la fila de la tabla
         }
     });
 
-    nuevaFila.insertCell(9).appendChild(botonEliminar);
+    // Agregar el botón de eliminar en una nueva celda
+    const celdaAccion = nuevaFila.insertCell(9);
+    celdaAccion.appendChild(botonEliminar);
 
+    // Agregar evento para cargar los datos en el formulario al hacer doble clic
     nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
 }
-
-
-
 
     function esReservaProxima(fecha) {
         const fechaReserva = new Date(fecha);
@@ -693,6 +709,19 @@ async function obtenerDatosReservas() {
             font-size: 16px;">
             BDD
         </button>
+
+        <button id="btnTransporte" style="
+        background-color: orange; 
+        color: white; 
+        padding: 10px 20px; 
+        border: none; 
+        border-radius: 50px; 
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        font-size: 16px;">
+        Transporte
+    </button>
+</div>
         </div>
     </div>
 

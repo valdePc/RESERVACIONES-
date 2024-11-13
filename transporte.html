@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Transporte</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        h2 {
+            color: #004aad;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            flex: 1 1 calc(50% - 30px);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+            outline: none;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background: linear-gradient(90deg, #ff5722, #ff9800);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .table-container {
+            margin-top: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #004aad;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gestión de Transporte</h2>
+        <form id="transporteForm" onsubmit="registrarTransporte(); return false;">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fechaRegistro">Fecha de Registro</label>
+                    <input type="date" id="fechaRegistro" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="fechaViaje">Fecha de Viaje</label>
+                    <input type="date" id="fechaViaje" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tipoViaje">Tipo de Viaje</label>
+                    <select id="tipoViaje" required>
+                        <option value="" disabled selected>Seleccione una opción</option>
+                        <option value="Llegada">Llegada</option>
+                        <option value="Salida">Salida</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="horaViaje">Hora del Viaje</label>
+                    <input type="time" id="horaViaje" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="destinoInicial">Destino Inicial</label>
+                    <input list="destinosIniciales" id="destinoInicial" placeholder="Seleccione o escriba un destino" required>
+                    <datalist id="destinosIniciales">
+                        <option value="Aeropuerto Internacional de las Américas">
+                        <option value="Aeropuerto Internacional del Cibao">
+                        <option value="Aeropuerto Internacional de Punta Cana">
+                    </datalist>
+                </div>
+                <div class="form-group">
+                    <label for="destinoFinal">Destino Final</label>
+                    <input list="destinosFinales" id="destinoFinal" placeholder="Seleccione o escriba un destino" required>
+                    <datalist id="destinosFinales">
+                        <option value="Aeropuerto Internacional de las Américas">
+                        <option value="Aeropuerto Internacional del Cibao">
+                        <option value="Aeropuerto Internacional de Punta Cana">
+                    </datalist>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numPersonas">Número de Personas</label>
+                    <input type="number" id="numPersonas" min="1" placeholder="Ingrese el número de personas" required>
+                </div>
+                <div class="form-group">
+                    <label for="chofer">Chofer</label>
+                    <select id="chofer" required>
+                        <option value="" disabled selected>Seleccione un chofer</option>
+                        <option value="Henrry">Henrry</option>
+                        <option value="Domingo">Domingo</option>
+                        <option value="Juan">Juan</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group-full">
+                <label for="comentarios">Comentarios Adicionales</label>
+                <textarea id="comentarios" rows="3" placeholder="Escriba comentarios adicionales"></textarea>
+            </div>
+            <div class="button-group">
+                <button type="submit">Guardar</button>
+                <button type="button" onclick="editarTransporte()">Editar</button>
+                <button type="button" onclick="eliminarTransporte()">Eliminar</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container table-container">
+        <h2>Transporte Registrado</h2>
+        <table id="tablaTransporte">
+            <thead>
+                <tr>
+                    <th>Fecha Registro</th>
+                    <th>Fecha Viaje</th>
+                    <th>Hora</th>
+                    <th>Tipo</th>
+                    <th>Destino Inicial</th>
+                    <th>Destino Final</th>
+                    <th>Número de Personas</th>
+                    <th>Chofer</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filas dinámicas -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+      const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+        const baseId = 'appLJWGTQ6xFXTRDl';
+        const tableName = 'Transporte';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("fechaRegistro").value = new Date().toISOString().split("T")[0];
+        });
+        async function registrarTransporte() {
+    // Obtener la fecha actual y formatearla a DDMMAA
+    const fechaActual = new Date();
+    const fechaRegistroDDMMAA = formatoFechaDDMMAA(fechaActual);
+
+    // Obtener valores del formulario
+    const transporte = {
+        FechaRegistro: fechaRegistroDDMMAA,
+        FechaViaje: formatoFechaDDMMAA(new Date(document.getElementById("fechaViaje").value)),
+        HoraViaje: formatoHoraHHMM(document.getElementById("horaViaje").value),
+        TipoViaje: document.getElementById("tipoViaje").value,
+        DestinoInicial: document.getElementById("destinoInicial").value,
+        DestinoFinal: document.getElementById("destinoFinal").value,
+        NumeroPersonas: parseInt(document.getElementById("numPersonas").value, 10),
+        Chofer: document.getElementById("chofer").value,
+        Comentarios: document.getElementById("comentarios").value || "",
+    };
+
+    // Validar campos obligatorios
+    if (!transporte.FechaViaje || !transporte.HoraViaje || !transporte.TipoViaje ||
+        !transporte.DestinoInicial || !transporte.DestinoFinal ||
+        isNaN(transporte.NumeroPersonas) || transporte.NumeroPersonas <= 0 ||
+        !transporte.Chofer) {
+        alert("Por favor, completa todos los campos requeridos.");
+        return;
+    }
+
+    try {
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ fields: transporte }),
+        });
+
+        if (response.ok) {
+            alert("Transporte guardado con éxito.");
+            const data = await response.json();
+            agregarFilaATabla(data.fields); // Reflejar datos en la tabla
+            limpiarFormulario(); // Limpia el formulario
+        } else {
+            const errorDetails = await response.json();
+            console.error("Error al guardar en Airtable:", errorDetails);
+            alert(`Error al guardar en Airtable: ${JSON.stringify(errorDetails)}`);
+        }
+    } catch (error) {
+        console.error("Error de conexión con Airtable:", error);
+        alert("Error al conectar con Airtable.");
+    }
+}
+
+// Función para formatear la fecha a DDMMAA
+function formatoFechaDDMMAA(fecha) {
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses son 0 indexados
+    const anio = String(fecha.getFullYear()).slice(-2); // Tomar los últimos 2 dígitos
+    return `${dia}${mes}${anio}`;
+}
+
+// Función para formatear la hora a HHMM
+function formatoHoraHHMM(hora) {
+    const [hh, mm] = hora.split(":");
+    return `${hh}${mm}`;
+}
+
+// Función para agregar fila a la tabla después de guardar
+function agregarFilaATabla(transporte) {
+    const tabla = document.getElementById("tablaTransporte").getElementsByTagName("tbody")[0];
+    const nuevaFila = tabla.insertRow();
+
+    nuevaFila.innerHTML = `
+        <td>${transporte.FechaRegistro || ""}</td>
+        <td>${transporte.FechaViaje || ""}</td>
+        <td>${transporte.HoraViaje || ""}</td>
+        <td>${transporte.TipoViaje || ""}</td>
+        <td>${transporte.DestinoInicial || ""}</td>
+        <td>${transporte.DestinoFinal || ""}</td>
+        <td>${transporte.NumeroPersonas || ""}</td>
+        <td>${transporte.Chofer || ""}</td>
+        <td>${transporte.Comentarios || ""}</td>
+    `;
+}
+
+// Función para limpiar el formulario después de guardar
+function limpiarFormulario() {
+    document.getElementById("fechaViaje").value = "";
+    document.getElementById("horaViaje").value = "";
+    document.getElementById("tipoViaje").value = "";
+    document.getElementById("destinoInicial").value = "";
+    document.getElementById("destinoFinal").value = "";
+    document.getElementById("numPersonas").value = "";
+    document.getElementById("chofer").value = "";
+    document.getElementById("comentarios").value = "";
+}
+
+async function cargarViajes() {
+    try {
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Datos obtenidos desde Airtable:", data); // Depuración
+
+            const viajes = data.records.map(record => ({
+                id: record.id,
+                ...record.fields,
+            }));
+
+            // Filtrar y ordenar los viajes
+            const viajesValidos = filtrarYOrdenarViajes(viajes);
+
+            // Mostrar los viajes en la tabla
+            mostrarViajesEnTabla(viajesValidos);
+        } else {
+            const errorDetails = await response.json();
+            console.error("Error al obtener los datos de Airtable:", errorDetails);
+            alert("Error al cargar los viajes. Revisa la consola para más detalles.");
+        }
+    } catch (error) {
+        console.error("Error al conectar con Airtable:", error);
+        alert("Error de conexión con Airtable.");
+    }
+}
+
+function filtrarYOrdenarViajes(viajes) {
+    const hoy = new Date();
+
+    // Filtrar viajes cuya fecha de viaje no haya caducado
+    const viajesValidos = viajes.filter(viaje => {
+        if (!viaje.FechaViaje) return false; // Ignorar registros sin fecha
+
+        const fechaViaje = convertirFechaDDMMAA(viaje.FechaViaje);
+        return fechaViaje >= hoy;
+    });
+
+    // Ordenar los viajes por fecha de viaje (más próximos primero)
+    viajesValidos.sort((a, b) => {
+        const fechaA = convertirFechaDDMMAA(a.FechaViaje);
+        const fechaB = convertirFechaDDMMAA(b.FechaViaje);
+        return fechaA - fechaB;
+    });
+
+    return viajesValidos;
+}
+
+function mostrarViajesEnTabla(viajes) {
+    const tabla = document.getElementById("tablaTransporte").getElementsByTagName("tbody")[0];
+    tabla.innerHTML = ""; // Limpiar la tabla
+
+    viajes.forEach(viaje => {
+        const nuevaFila = tabla.insertRow();
+
+        // Verificar si el viaje está dentro de los próximos 3 días
+        const fechaViaje = convertirFechaDDMMAA(viaje.FechaViaje);
+        const hoy = new Date();
+        const diferenciaDias = Math.ceil((fechaViaje - hoy) / (1000 * 60 * 60 * 24));
+
+        // Agregar fila
+        nuevaFila.innerHTML = `
+            <td>${viaje.FechaRegistro || ""}</td>
+            <td>${viaje.FechaViaje || ""}</td>
+            <td>${viaje.HoraViaje || ""}</td>
+            <td>${viaje.TipoViaje || ""}</td>
+            <td>${viaje.DestinoInicial || ""}</td>
+            <td>${viaje.DestinoFinal || ""}</td>
+            <td>${viaje.NumeroPersonas || ""}</td>
+            <td>${viaje.Chofer || ""}</td>
+            <td>${viaje.Comentarios || ""}</td>
+        `;
+
+        // Resaltar en rojo si el viaje está dentro de los próximos 3 días
+        if (diferenciaDias <= 3 && diferenciaDias >= 0) {
+            nuevaFila.style.backgroundColor = "red";
+            nuevaFila.style.color = "white";
+            nuevaFila.style.fontWeight = "bold";
+        }
+    });
+}
+
+function convertirFechaDDMMAA(fechaDDMMAA) {
+    // Convertir fecha en formato DDMMAA a objeto Date
+    const dia = parseInt(fechaDDMMAA.substring(0, 2), 10);
+    const mes = parseInt(fechaDDMMAA.substring(2, 4), 10) - 1; // Meses son 0 indexados
+    const anio = 2000 + parseInt(fechaDDMMAA.substring(4, 6), 10); // Asumimos años a partir del 2000
+    return new Date(anio, mes, dia);
+}
+
+// Cargar viajes al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    cargarViajes();
+});
+
+
+    </script>
+</body>
+</html>
