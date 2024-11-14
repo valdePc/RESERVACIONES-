@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso a Reservaciones</title>
+    <link rel="icon" type="image/png" href="images/icon-192x192.png">
+    <link rel="manifest" href="manifest.json">
+ 
     <style>
+        
         body {
             display: flex;
             justify-content: center;
@@ -162,9 +166,18 @@
         }
     </script>
 </head>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+            .then(() => console.log('Service Worker registrado con éxito'))
+            .catch((error) => console.error('Error al registrar el Service Worker:', error));
+    }
+</script>
+
 <body>
+   
     <div class="container">
-        <img src="images/descarga.png" alt="Logo de Reservaciones" style="width: 100px; height: auto;">
+        <img src="C:\NPH and OWS\images\icon-192x192.png" alt="Logo de Reservaciones" style="width: 100px; height: auto;">
         <h1>Acceso a Reservaciones</h1>
         
         <select id="nombres" required>
