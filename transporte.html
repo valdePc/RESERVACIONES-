@@ -179,8 +179,6 @@
             </div>
             <div class="button-group">
                 <button type="submit">Guardar</button>
-                <button type="button" onclick="editarTransporte()">Editar</button>
-                <button type="button" onclick="eliminarTransporte()">Eliminar</button>
             </div>
         </form>
     </div>
@@ -208,111 +206,44 @@
     </div>
 
     <script>
-      const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
+        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
         const baseId = 'appLJWGTQ6xFXTRDl';
         const tableName = 'Transporte';
 
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("fechaRegistro").value = new Date().toISOString().split("T")[0];
+        document.addEventListener("DOMContentLoaded", async () => {
+            document.getElementById("fechaRegistro").value = obtenerFechaLocal();
+ 
+            await cargarViajes(); // Cargar datos al cargar la página
         });
-        async function registrarTransporte() {
-    // Obtener la fecha actual y formatearla a DDMMAA
-    const fechaActual = new Date();
-    const fechaRegistroDDMMAA = formatoFechaDDMMAA(fechaActual);
-
-    // Obtener valores del formulario
-    const transporte = {
-        FechaRegistro: fechaRegistroDDMMAA,
-        FechaViaje: formatoFechaDDMMAA(new Date(document.getElementById("fechaViaje").value)),
-        HoraViaje: formatoHoraHHMM(document.getElementById("horaViaje").value),
-        TipoViaje: document.getElementById("tipoViaje").value,
-        DestinoInicial: document.getElementById("destinoInicial").value,
-        DestinoFinal: document.getElementById("destinoFinal").value,
-        NumeroPersonas: parseInt(document.getElementById("numPersonas").value, 10),
-        Chofer: document.getElementById("chofer").value,
-        Comentarios: document.getElementById("comentarios").value || "",
-    };
-
-    // Validar campos obligatorios
-    if (!transporte.FechaViaje || !transporte.HoraViaje || !transporte.TipoViaje ||
-        !transporte.DestinoInicial || !transporte.DestinoFinal ||
-        isNaN(transporte.NumeroPersonas) || transporte.NumeroPersonas <= 0 ||
-        !transporte.Chofer) {
-        alert("Por favor, completa todos los campos requeridos.");
-        return;
-    }
-
-    try {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ fields: transporte }),
-        });
-
-        if (response.ok) {
-            alert("Transporte guardado con éxito.");
-            const data = await response.json();
-            agregarFilaATabla(data.fields); // Reflejar datos en la tabla
-            limpiarFormulario(); // Limpia el formulario
-        } else {
-            const errorDetails = await response.json();
-            console.error("Error al guardar en Airtable:", errorDetails);
-            alert(`Error al guardar en Airtable: ${JSON.stringify(errorDetails)}`);
-        }
-    } catch (error) {
-        console.error("Error de conexión con Airtable:", error);
-        alert("Error al conectar con Airtable.");
-    }
-}
-
-// Función para formatear la fecha a DDMMAA
-function formatoFechaDDMMAA(fecha) {
-    const dia = String(fecha.getDate()).padStart(2, "0");
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Los meses son 0 indexados
-    const anio = String(fecha.getFullYear()).slice(-2); // Tomar los últimos 2 dígitos
-    return `${dia}${mes}${anio}`;
-}
-
-// Función para formatear la hora a HHMM
-function formatoHoraHHMM(hora) {
-    const [hh, mm] = hora.split(":");
-    return `${hh}${mm}`;
-}
-
-// Función para agregar fila a la tabla después de guardar
-function agregarFilaATabla(transporte) {
+        function agregarFilaATabla(transporte) {
+    console.log("Agregando transporte:", transporte); // Depuración
     const tabla = document.getElementById("tablaTransporte").getElementsByTagName("tbody")[0];
-    const nuevaFila = tabla.insertRow();
+    const fila = tabla.insertRow();
 
-    nuevaFila.innerHTML = `
-        <td>${transporte.FechaRegistro || ""}</td>
-        <td>${transporte.FechaViaje || ""}</td>
-        <td>${transporte.HoraViaje || ""}</td>
-        <td>${transporte.TipoViaje || ""}</td>
-        <td>${transporte.DestinoInicial || ""}</td>
-        <td>${transporte.DestinoFinal || ""}</td>
-        <td>${transporte.NumeroPersonas || ""}</td>
-        <td>${transporte.Chofer || ""}</td>
-        <td>${transporte.Comentarios || ""}</td>
-    `;
+    const hoy = new Date().toISOString().split("T")[0];
+    const diferencia = diferenciaDias(hoy, transporte.FechaViaje);
+
+    fila.innerHTML = `
+    <td>${formatoFechaDDMMYY(transporte.FechaRegistro) || ""}</td>
+    <td>${formatoFechaDDMMYY(transporte.FechaViaje) || ""}</td>
+    <td>${transporte.HoraViaje || ""}</td>
+    <td>${transporte.TipoViaje || ""}</td>
+    <td>${transporte.DestinoInicial || ""}</td>
+    <td>${transporte.DestinoFinal || ""}</td>
+    <td>${transporte.NumeroPersonas || ""}</td>
+    <td>${transporte.Chofer || ""}</td>
+    <td>${transporte.Comentarios || ""}</td>
+`;
+
+
+    if (diferencia > 0 && diferencia <= 3) {
+        fila.style.backgroundColor = "red";
+        fila.style.color = "white";
+        fila.style.fontWeight = "bold";
+    }
 }
 
-// Función para limpiar el formulario después de guardar
-function limpiarFormulario() {
-    document.getElementById("fechaViaje").value = "";
-    document.getElementById("horaViaje").value = "";
-    document.getElementById("tipoViaje").value = "";
-    document.getElementById("destinoInicial").value = "";
-    document.getElementById("destinoFinal").value = "";
-    document.getElementById("numPersonas").value = "";
-    document.getElementById("chofer").value = "";
-    document.getElementById("comentarios").value = "";
-}
-
+     
 async function cargarViajes() {
     try {
         const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
@@ -326,95 +257,94 @@ async function cargarViajes() {
         if (response.ok) {
             const data = await response.json();
             console.log("Datos obtenidos desde Airtable:", data); // Depuración
+            const registros = data.records.map(record => record.fields);
 
-            const viajes = data.records.map(record => ({
-                id: record.id,
-                ...record.fields,
-            }));
+            const hoy = new Date().toISOString().split("T")[0];
+            const viajesValidos = registros.filter(viaje => {
+                console.log("Verificando fecha de viaje:", viaje.FechaViaje); // Depuración
+                if (!viaje.FechaViaje) return false;
+                return new Date(viaje.FechaViaje) >= new Date(hoy);
+            });
 
-            // Filtrar y ordenar los viajes
-            const viajesValidos = filtrarYOrdenarViajes(viajes);
-
-            // Mostrar los viajes en la tabla
-            mostrarViajesEnTabla(viajesValidos);
+            viajesValidos.forEach(viaje => agregarFilaATabla(viaje));
         } else {
-            const errorDetails = await response.json();
-            console.error("Error al obtener los datos de Airtable:", errorDetails);
-            alert("Error al cargar los viajes. Revisa la consola para más detalles.");
+            const error = await response.json();
+            console.error("Error al cargar datos desde Airtable:", error);
         }
     } catch (error) {
         console.error("Error al conectar con Airtable:", error);
-        alert("Error de conexión con Airtable.");
     }
 }
 
-function filtrarYOrdenarViajes(viajes) {
-    const hoy = new Date();
+async function registrarTransporte() {
+    const transporte = {
+        FechaRegistro: document.getElementById("fechaRegistro").value,
+        FechaViaje: document.getElementById("fechaViaje").value,
+        HoraViaje: document.getElementById("horaViaje").value,
+        TipoViaje: document.getElementById("tipoViaje").value,
+        DestinoInicial: document.getElementById("destinoInicial").value,
+        DestinoFinal: document.getElementById("destinoFinal").value,
+        NumeroPersonas: parseInt(document.getElementById("numPersonas").value, 10),
+        Chofer: document.getElementById("chofer").value,
+        Comentarios: document.getElementById("comentarios").value || "",
+    };
 
-    // Filtrar viajes cuya fecha de viaje no haya caducado
-    const viajesValidos = viajes.filter(viaje => {
-        if (!viaje.FechaViaje) return false; // Ignorar registros sin fecha
+    try {
+        const response = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ fields: transporte }),
+        });
 
-        const fechaViaje = convertirFechaDDMMAA(viaje.FechaViaje);
-        return fechaViaje >= hoy;
-    });
-
-    // Ordenar los viajes por fecha de viaje (más próximos primero)
-    viajesValidos.sort((a, b) => {
-        const fechaA = convertirFechaDDMMAA(a.FechaViaje);
-        const fechaB = convertirFechaDDMMAA(b.FechaViaje);
-        return fechaA - fechaB;
-    });
-
-    return viajesValidos;
-}
-
-function mostrarViajesEnTabla(viajes) {
-    const tabla = document.getElementById("tablaTransporte").getElementsByTagName("tbody")[0];
-    tabla.innerHTML = ""; // Limpiar la tabla
-
-    viajes.forEach(viaje => {
-        const nuevaFila = tabla.insertRow();
-
-        // Verificar si el viaje está dentro de los próximos 3 días
-        const fechaViaje = convertirFechaDDMMAA(viaje.FechaViaje);
-        const hoy = new Date();
-        const diferenciaDias = Math.ceil((fechaViaje - hoy) / (1000 * 60 * 60 * 24));
-
-        // Agregar fila
-        nuevaFila.innerHTML = `
-            <td>${viaje.FechaRegistro || ""}</td>
-            <td>${viaje.FechaViaje || ""}</td>
-            <td>${viaje.HoraViaje || ""}</td>
-            <td>${viaje.TipoViaje || ""}</td>
-            <td>${viaje.DestinoInicial || ""}</td>
-            <td>${viaje.DestinoFinal || ""}</td>
-            <td>${viaje.NumeroPersonas || ""}</td>
-            <td>${viaje.Chofer || ""}</td>
-            <td>${viaje.Comentarios || ""}</td>
-        `;
-
-        // Resaltar en rojo si el viaje está dentro de los próximos 3 días
-        if (diferenciaDias <= 3 && diferenciaDias >= 0) {
-            nuevaFila.style.backgroundColor = "red";
-            nuevaFila.style.color = "white";
-            nuevaFila.style.fontWeight = "bold";
+        if (response.ok) {
+            alert("Registro guardado con éxito");
+            const data = await response.json();
+            agregarFilaATabla(data.fields);
+            limpiarFormulario();
+        } else {
+            const error = await response.json();
+            console.error("Error al guardar:", error);
         }
-    });
+    } catch (error) {
+        console.error("Error al conectar:", error);
+    }
 }
 
-function convertirFechaDDMMAA(fechaDDMMAA) {
-    // Convertir fecha en formato DDMMAA a objeto Date
-    const dia = parseInt(fechaDDMMAA.substring(0, 2), 10);
-    const mes = parseInt(fechaDDMMAA.substring(2, 4), 10) - 1; // Meses son 0 indexados
-    const anio = 2000 + parseInt(fechaDDMMAA.substring(4, 6), 10); // Asumimos años a partir del 2000
-    return new Date(anio, mes, dia);
+        function limpiarFormulario() {
+            document.getElementById("fechaViaje").value = "";
+            document.getElementById("horaViaje").value = "";
+            document.getElementById("tipoViaje").value = "";
+            document.getElementById("destinoInicial").value = "";
+            document.getElementById("destinoFinal").value = "";
+            document.getElementById("numPersonas").value = "";
+            document.getElementById("chofer").value = "";
+            document.getElementById("comentarios").value = "";
+        }
+        function diferenciaDias(fecha1, fecha2) {
+    const diaEnMilisegundos = 1000 * 60 * 60 * 24;
+    const fecha1Obj = new Date(fecha1); // Convierte la fecha en objeto Date
+    const fecha2Obj = new Date(fecha2); // Convierte la fecha en objeto Date
+    return Math.ceil((fecha2Obj - fecha1Obj) / diaEnMilisegundos); // Diferencia en días
+}
+function formatoFechaDDMMYY(fecha) {
+    if (!fecha) return ""; // Retorna vacío si no hay fecha
+    const fechaObj = new Date(fecha);
+    const dia = String(fechaObj.getDate()).padStart(2, "0");
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, "0");
+    const anio = String(fechaObj.getFullYear()).slice(-2); // Últimos dos dígitos del año
+    return `${dia}/${mes}/${anio}`;
+}
+function obtenerFechaLocal() {
+    const fecha = new Date();
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0"); // Meses son 0 indexados
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    return `${anio}-${mes}-${dia}`; // Formato YYYY-MM-DD para inputs de tipo date
 }
 
-// Cargar viajes al cargar la página
-document.addEventListener("DOMContentLoaded", () => {
-    cargarViajes();
-});
 
 
     </script>
