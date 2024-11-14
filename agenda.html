@@ -484,48 +484,124 @@ async function obtenerDatosReservas() {
         });
         mostrarReservasEnTabla(reservasSalidas);
     }
-
     async function verificarDisponibilidad() {
-        // Función para verificar la disponibilidad basada en entradas de usuario
-        const fechaEntrada = prompt("Ingrese la fecha de entrada (YYYY-MM-DD):");
-        const fechaSalida = prompt("Ingrese la fecha de salida (YYYY-MM-DD):");
-        const cuposSolicitados = parseInt(prompt("Ingrese la cantidad de cupos que necesita:"));
+    const fechaEntrada = prompt("Ingrese la fecha de entrada (DD/MM/AA o DD-MM-AA):");
+    const fechaSalida = prompt("Ingrese la fecha de salida (DD/MM/AA o DD-MM-AA):");
+    const cuposSolicitados = parseInt(prompt("Ingrese la cantidad de cupos que necesita:"));
 
-        if (!fechaEntrada || !fechaSalida || isNaN(cuposSolicitados)) {
-            alert("Fecha de entrada, fecha de salida o cantidad de cupos no válidos.");
-            return;
-        }
+    if (!fechaEntrada || !fechaSalida || isNaN(cuposSolicitados)) {
+        alert("Datos ingresados inválidos. Por favor, intente nuevamente.");
+        return;
+    }
 
-        const fechaInicio = new Date(fechaEntrada);
-        const fechaFin = new Date(fechaSalida);
-        let diasConDisponibilidad = [];
-        let diasSinDisponibilidad = [];
-        let enDisponibilidad = null;
+    // Función para limpiar y convertir fechas al formato ISO
+    const formatearFechaISO = (fecha) => {
+        const fechaLimpiada = fecha.replace(/[-/]/g, ""); // Elimina separadores
+        const [dia, mes, año] = [fechaLimpiada.slice(0, 2), fechaLimpiada.slice(2, 4), fechaLimpiada.slice(4)];
+        return `20${año}-${mes}-${dia}`;
+    };
 
-        for (let fecha = fechaInicio; fecha <= fechaFin; fecha.setDate(fecha.getDate() + 1)) {
-            const fechaConsulta = fecha.toISOString().split('T')[0];
-            const reservasPorFecha = await obtenerReservasPorFecha(fechaConsulta);
-            const cuposOcupados = reservasPorFecha.reduce((acc, res) => acc + res['Número de Cupos'], 0);
-            const cuposDisponibles = maxCapacity - cuposOcupados;
+    const fechaInicio = new Date(formatearFechaISO(fechaEntrada));
+    const fechaFin = new Date(formatearFechaISO(fechaSalida));
 
-            if (cuposSolicitados <= cuposDisponibles) {
-                if (enDisponibilidad !== true) {
-                    diasConDisponibilidad.push([fechaConsulta]);
-                    enDisponibilidad = true;
+    const reservas = await obtenerReservasEnRango(fechaInicio, fechaFin);
+
+    // Procesar disponibilidad por días
+    let diasConDisponibilidad = [];
+    let diasSinDisponibilidad = [];
+    let rangoActual = null;
+    let disponibilidadActual = null;
+
+    for (let fecha = fechaInicio; fecha <= fechaFin; fecha.setDate(fecha.getDate() + 1)) {
+        const fechaConsulta = fecha.toISOString().split("T")[0];
+        const reservasDelDia = reservas[fechaConsulta] || 0; // Cargar reservas o 0 si no hay
+        const cuposDisponibles = maxCapacity - reservasDelDia;
+
+        const nuevaDisponibilidad = cuposSolicitados <= cuposDisponibles;
+        const fechaFormateada = fechaConsulta.split("-").reverse().join("/");
+
+        if (nuevaDisponibilidad !== disponibilidadActual) {
+            if (rangoActual) {
+                if (disponibilidadActual) {
+                    diasConDisponibilidad.push(rangoActual);
                 } else {
-                    diasConDisponibilidad[diasConDisponibilidad.length - 1].push(fechaConsulta);
-                }
-            } else {
-                if (enDisponibilidad !== false) {
-                    diasSinDisponibilidad.push([fechaConsulta]);
-                    enDisponibilidad = false;
-                } else {
-                    diasSinDisponibilidad[diasSinDisponibilidad.length - 1].push(fechaConsulta);
+                    diasSinDisponibilidad.push(rangoActual);
                 }
             }
+            rangoActual = [fechaFormateada];
+            disponibilidadActual = nuevaDisponibilidad;
+        } else {
+            rangoActual[1] = fechaFormateada;
         }
+    }
 
-        let mensaje = "";
+    // Agregar el último rango
+    if (rangoActual) {
+        if (disponibilidadActual) {
+            diasConDisponibilidad.push(rangoActual);
+        } else {
+            diasSinDisponibilidad.push(rangoActual);
+        }
+    }
+
+    // Construir mensaje para el usuario
+    let mensaje = "";
+
+    if (diasConDisponibilidad.length > 0) {
+        mensaje += "Fechas con disponibilidad:\n";
+        diasConDisponibilidad.forEach(rango => {
+            mensaje += `- Del ${rango[0]} al ${rango[1] || rango[0]} hay disponibilidad suficiente.\n`;
+        });
+    }
+
+    if (diasSinDisponibilidad.length > 0) {
+        mensaje += "\nFechas SIN disponibilidad:\n";
+        diasSinDisponibilidad.forEach(rango => {
+            mensaje += `- Del ${rango[0]} al ${rango[1] || rango[0]} no hay disponibilidad suficiente.\n`;
+        });
+    }
+
+    if (!mensaje) {
+        mensaje = "No se encontró disponibilidad para el rango de fechas especificado.";
+    }
+
+    alert(mensaje);
+}
+
+async function obtenerReservasEnRango(fechaInicio, fechaFin) {
+    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+    const response = await fetch(url, {
+        headers: {
+            Authorization: `Bearer ${apiKey}`
+        }
+    });
+
+    const data = await response.json();
+
+    // Mapear las reservas por fecha
+    const reservasPorFecha = {};
+    data.records.forEach(record => {
+        const entrada = record.fields.Entrada;
+        const salida = record.fields.Salida;
+        const cupos = record.fields["Número de Cupos"] || 0;
+
+        if (!entrada || !salida) return;
+
+        let fechaActual = new Date(entrada);
+        const fechaSalida = new Date(salida);
+
+        while (fechaActual <= fechaSalida) {
+            const fechaConsulta = fechaActual.toISOString().split("T")[0];
+            reservasPorFecha[fechaConsulta] = (reservasPorFecha[fechaConsulta] || 0) + cupos;
+            fechaActual.setDate(fechaActual.getDate() + 1);
+        }
+    });
+
+    console.log("Reservas por fecha:", reservasPorFecha); // Depuración
+    return reservasPorFecha;
+}
+
+
 
         diasConDisponibilidad.forEach(rango => {
             const inicio = rango[0];
@@ -552,7 +628,6 @@ async function obtenerDatosReservas() {
         }
 
         alert(mensaje);
-    }
 
     async function obtenerReservasPorFecha(fecha) {
         const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;

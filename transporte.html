@@ -367,33 +367,43 @@
         }
     
         async function cargarViajes() {
-            try {
-                const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${apiKey}`,
-                    },
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    const registros = data.records.map(record => ({
-                        ...record.fields,
-                        FechaViaje: record.fields.FechaViaje ? new Date(record.fields.FechaViaje).toISOString().split("T")[0] : null,
-                    }));
-    
-                    const hoy = new Date().toISOString().split("T")[0];
-                    const viajesValidos = registros.filter(viaje => viaje.FechaViaje && new Date(viaje.FechaViaje) >= new Date(hoy));
-                    viajesValidos.forEach(viaje => agregarFilaATabla(viaje));
-                } else {
-                    const error = await response.json();
-                    console.error("Error al cargar datos desde Airtable:", error);
-                }
-            } catch (error) {
-                console.error("Error al conectar con Airtable:", error);
-            }
+    try {
+        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            const registros = data.records.map(record => ({
+                ...record.fields,
+                FechaViaje: record.fields.FechaViaje
+                    ? new Date(record.fields.FechaViaje).toISOString().split("T")[0]
+                    : null,
+            }));
+
+            const hoy = new Date().toISOString().split("T")[0];
+
+            // Filtrar viajes válidos y ordenar por proximidad de fecha
+            const viajesValidos = registros
+                .filter(viaje => viaje.FechaViaje && new Date(viaje.FechaViaje) >= new Date(hoy))
+                .sort((a, b) => new Date(a.FechaViaje) - new Date(b.FechaViaje));
+
+            // Agregar filas ordenadas a la tabla
+            viajesValidos.forEach(viaje => agregarFilaATabla(viaje));
+        } else {
+            const error = await response.json();
+            console.error("Error al cargar datos desde Airtable:", error);
         }
+    } catch (error) {
+        console.error("Error al conectar con Airtable:", error);
+    }
+}
+
     
         async function registrarTransporte() {
             const transporte = {
