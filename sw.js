@@ -2,7 +2,7 @@
 self.addEventListener('install', (event) => {
     console.log('Service Worker instalado');
     event.waitUntil(
-        caches.open('mi-app-v1').then((cache) => {
+        caches.open('Visitas-v1').then((cache) => {
             return cache.addAll([
                 './index.html',
                 './manifest.json',

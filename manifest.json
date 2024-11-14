@@ -1,6 +1,6 @@
 {
-    "name": "Mi Programa",
-    "short_name": "Programa",
+    "name": "Visitas",
+    "short_name": "Visitas",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#ffffff",
