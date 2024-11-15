@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso a Reservaciones</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="icon" type="image/png" href="images/icon-192x192.png">
     <link rel="manifest" href="manifest.json">
  <!-- Cambio de prueba -->
@@ -12,25 +13,28 @@
         
         body {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #141e30, #243b55);
-            font-family: 'Roboto', sans-serif;
-            color: #ffffff;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    overflow-x: hidden; /* Evita desbordamiento horizontal */
+
         }
         .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1000px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            text-align: center;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 350px;
-        }
-        h1 {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+    text-align: center;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    width: 90%; /* Responsivo */
+    max-width: 700px;
+}
+               h1 {
             font-size: 24px;
             margin-bottom: 20px;
             color: #e0e0e0;
@@ -41,7 +45,7 @@
             margin-bottom: 20px;
         }
         select, input[type="password"] {
-            width: 100%;
+            width: 160%;
             padding: 12px;
             margin: 10px 0;
             border: none;
@@ -173,6 +177,10 @@
             .then(() => console.log('Service Worker registrado con éxito'))
             .catch((error) => console.error('Error al registrar el Service Worker:', error));
     }
+    document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+});
+
 </script>
 
 <body>
