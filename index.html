@@ -31,9 +31,11 @@
     text-align: center;
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.18);
-    width: 90%; /* Responsivo */
-    max-width: 700px;
+    width: 90%; /* Flexible para pantallas pequeñas */
+    max-width: 400px; /* No más grande que este tamaño */
+    box-sizing: border-box; /* Incluye padding y border */
 }
+
                h1 {
             font-size: 24px;
             margin-bottom: 20px;
@@ -45,16 +47,18 @@
             margin-bottom: 20px;
         }
         select, input[type="password"] {
-            width: 160%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            outline: none;
-        }
+    width: calc(100% - 20px); /* Asegura que haya espacio dentro del padding */
+    max-width: 100%; /* Evita que sobresalgan */
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    outline: none;
+    box-sizing: border-box; /* Incluye padding en el ancho */
+}
         select::placeholder, input::placeholder {
             color: #d1d1d1;
         }
