@@ -121,9 +121,11 @@ input.addEventListener("input", () => {
     chatContext.push({ role: "user", content: text });
 
     const normalized = text
-      .toLowerCase()
-      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s]/g, "");
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    // Permitir los dos puntos:
+    .replace(/[^\w\s:]/g, "");
+  
 
       if (/\b(hola|hello|hallo)\b/.test(normalized)) {
         const reply = normalized.includes("hello")
@@ -157,53 +159,44 @@ input.addEventListener("input", () => {
       chatContext.push({ role: "assistant", content: reply });
       return;
     }
-    if (/\b(registros de)\b/.test(normalized)) {
-        const contacto = text.split("registros de")[1]?.trim().toLowerCase();
-        appendBot(`Buscando registros para el contacto: ${contacto}…`, 'bot');
-        try {
-          const registros = await fetchReservasPorContacto(contacto);
-          if (!registros.length) {
-            appendBot(`No se encontraron registros para ${contacto}.`);
-            return;
-          }
-      
-          // Mostrar en la tabla si existe
-          const tabla = document.getElementById("reservasTabla")?.getElementsByTagName("tbody")[0];
-          if (tabla) {
-            tabla.innerHTML = ""; // Limpiar tabla actual
-            const fmt = d => d ? `${d.split("-")[2]}/${d.split("-")[1]}/${d.split("-")[0]}` : "";
-            registros.forEach(r => {
-              const row = tabla.insertRow();
-              row.insertCell().innerText = fmt(r["Fecha de Registro"] || "");
-              row.insertCell().innerText = fmt(r["Entrada"] || "");
-              row.insertCell().innerText = fmt(r["Salida"] || "");
-              row.insertCell().innerText = r["Locación"] || "";
-              row.insertCell().innerText = r["Número de Cupos"] || "";
-              row.insertCell().innerText = r["Número de Personas"] || "";
-              row.insertCell().innerText = r["Contacto"] || "";
-              row.insertCell().innerText = r["Vuelo"] || "";
-              row.insertCell().innerText = r["Comentario"] || "";
-              row.insertCell().innerText = r["Eliminados"] || ""; // mostrar estado si está eliminado
-            });
-            appendBot("📋 He colocado los registros en la tabla de abajo. ¡Revisa si todo está bien!");
-          }
-      
-          // También mostrar resumen en el chat
-          const lista = registros.map(r =>
-            `📍 *${r['Locación'] || 'Sin ubicación'}*\n` +
-            `🗓️ ${r['Entrada']} → ${r['Salida']}\n` +
-            `👤 ${r['Contacto']} | 👥 ${r['Número de Personas'] || 1} personas` +
-            (r['Comentario'] ? `\n💬 ${r['Comentario']}` : '') +
-            (r['Eliminados'] ? `\n❌ Estado: ${r['Eliminados']}` : '')
-          ).join("\n\n");
-      
-          appendBot(lista);
-        } catch (e) {
-          console.error(e);
-          appendBot("❌ Hubo un error al obtener los registros.");
-        }
-        return;
-      }
+ // —————— Datos del contacto ——————
+if (normalized.startsWith("datos del contacto")) {
+  // Extraemos lo que venga tras los dos puntos
+  const contacto = text.split(":")[1]?.trim();
+  appendBot(`🔍 Buscando registros para el contacto: ${contacto}…`);
+  try {
+    const registros = await fetchReservasPorContacto(contacto);
+    if (!registros.length) {
+      appendBot(`No se encontraron registros para ${contacto}.`);
+      return;
+    }
+    // Pinto los registros en la tabla
+    const tbody = document.getElementById("reservasTabla")?.tBodies[0];
+    if (tbody) {
+      tbody.innerHTML = "";
+      const fmt = d => d ? `${d.split("-")[2]}/${d.split("-")[1]}/${d.split("-")[0]}` : "";
+      registros.forEach(r => {
+        const row = tbody.insertRow();
+        row.insertCell().innerText = fmt(r["Fecha de Registro"] || "");
+        row.insertCell().innerText = fmt(r["Entrada"] || "");
+        row.insertCell().innerText = fmt(r["Salida"] || "");
+        row.insertCell().innerText = r["Locación"] || "";
+        row.insertCell().innerText = r["Número de Cupos"] || "";
+        row.insertCell().innerText = r["Número de Personas"] || "";
+        row.insertCell().innerText = r["Contacto"] || "";
+        row.insertCell().innerText = r["Vuelo"] || "";
+        row.insertCell().innerText = r["Comentario"] || "";
+      });
+      appendBot("📋 He colocado los registros en la tabla de abajo. ¡Revisa si todo está bien!");
+    }
+  } catch (err) {
+    console.error(err);
+    appendBot("❌ Hubo un error al obtener los registros.");
+  }
+  return;  // Salimos sin llamar a /api/chat
+}
+// —————— fin Datos del contacto ——————
+
       
       if (/\b(mis registros|mis reservas|lo mío)\b/.test(normalized)) {
         appendBot(`Buscando tus registros, ${nombreUsuario}...`, 'bot');
