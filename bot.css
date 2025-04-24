@@ -1,0 +1,190 @@
+/* Contenedor base */
+#chat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  font-family: sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  transform: translateY(260px);
+  z-index: 1000;
+}
+#chat-widget.open {
+  transform: translateY(0);
+}
+
+/* Header clicable */
+#chat-header {
+  background: #210be5;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+/* #chat-header::before {
+  content: '💬';
+  margin-right: 8px;
+} */
+
+/* Cuerpo de mensajes */
+#chat-body {
+  background: #b6ababf3;
+  height: 200px;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Formularios */
+#chat-form {
+  display: flex;
+  border-top: 1px solid #3309ed;
+}
+#chat-input {
+  flex: 1;
+  border: none;
+  padding: 8px;
+  font-size: 14px;
+}
+#chat-input:focus { outline: none; }
+#chat-form button {
+  background: #005bbb;
+  color: white;
+  border: none;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+/* Mensajes */
+.message {
+  padding: 6px 10px;
+  border-radius: 12px;
+  max-width: 80%;
+}
+.message.user {
+  background: #ffffff;
+  color: rgb(17, 11, 11);
+  align-self: flex-end;
+}
+.message.bot {
+  background: #0e0e0e;
+  color: #fcfcfc;
+  align-self: flex-start;
+}
+.message.error {
+  background: #ffe0e0;
+  color: #a00;
+  font-style: italic;
+  align-self: center;
+}
+#chat-form {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+#chat-form button {
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+}
+#chat-form {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+#chat-form button {
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+}
+.typing-dots span {
+animation: blink 1s infinite;
+opacity: 0.3;
+}
+
+.typing-dots span:nth-child(2) {
+animation-delay: 0.2s;
+}
+.typing-dots span:nth-child(3) {
+animation-delay: 0.4s;
+}
+
+@keyframes blink {
+0%, 20% { opacity: 0.3; }
+50% { opacity: 1; }
+100% { opacity: 0.3; }
+}
+#mic-btn, #send-btn {
+transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#mic-btn[style*="display: none"],
+#send-btn[style*="display: none"] {
+opacity: 0;
+visibility: hidden;
+}
+
+/* Estilos específicos para el botón de enviar */
+#send-btn {
+  background: var(--color-primary); /* el azul principal de tu tema */
+  color: #9e2b2b;                      /* texto blanco */
+  border-radius: 50%;               /* círculo */
+  width: 36px;                      /* igual alto y ancho */
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;                /* icono más grande */
+  transition: background 0.2s;
+}
+
+#send-btn:hover {
+  background: var(--color-accent);  /* un tono al pasar el ratón */
+}
+
+/* Fuerza que #send-btn se vea cuando está inline-block */
+#send-btn {
+  /* Fuera background none / transparente */
+  background-color: var(--color-primary) !important;
+  color: #fff !important;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+}
+
+/* Hover para feedback */
+#send-btn:hover {
+  background-color: var(--color-accent) !important;
+}
+
+/* Opcional: micrófono igual estilo para que no parezca solo un icono blanco */
+#mic-btn {
+  background-color: var(--color-accent2);
+  color: #fff;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+}
+#mic-btn:hover {
+  background-color: var(--color-primary);
+}

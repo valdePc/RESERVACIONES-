@@ -1,0 +1,217 @@
+/* transporte.css */
+
+/* Variables de color mejoradas */
+:root {
+    --bg-page:           #0F1C2E;              /* azul oscuro profundo */
+    --bg-card:           rgba(255, 255, 255, 0.08);
+    --accent-primary:    #56CCF2;              /* azul cielo vivo */
+    --accent-secondary:  #2F80ED;              /* azul medio */
+    --text-light:        #050505;              /* gris muy claro */
+    --text-dark:         #1B262C;              /* gris oscuro */
+    --border-radius:     12px;
+    --shadow-soft:       0 4px 20px rgba(0, 0, 0, 0.6);
+    --shadow-accent:     0 4px 15px rgba(86, 204, 242, 0.4);
+  }
+  
+  /* Reset y fondo */
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* Tarjeta principal */
+  .container {
+    background: var(--bg-card);
+    margin: 30px auto;
+    padding: 40px;
+    width: 90%;
+    max-width: 900px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Título */
+  h2 {
+    margin: 0 0 30px;
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  
+  /* Filas del formulario */
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+  }
+  
+  /* Grupos de campos */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  /* Etiquetas */
+  label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--accent-secondary);
+  }
+  
+  /* Campos de entrada */
+  input,
+  select,
+  textarea {
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* Focus en campos */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 0 8px var(--accent-primary), 
+      inset 0 0 8px var(--accent-secondary);
+  }
+  
+  /* Textarea ajustable */
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  /* Botones principales */
+  .button-group {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  button {
+    padding: 12px 28px;
+    margin: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: var(--accent-primary);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    box-shadow: var(--shadow-accent);
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  button:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-3px);
+    box-shadow: 
+      0 6px 20px rgba(47, 128, 237, 0.4),
+      inset 0 0 8px rgba(86, 204, 242, 0.2);
+  }
+  
+  /* Tabla de datos */
+  .table-container {
+    margin-top: 40px;
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  th,
+  td {
+    padding: 12px 16px;
+    text-align: left;
+  }
+  
+  th {
+    background: var(--accent-primary);
+    color: var(--text-dark);
+    font-weight: 600;
+  }
+  
+  tbody tr {
+    background: var(--bg-card);
+  }
+  
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  tbody tr:hover {
+    background: rgba(86, 204, 242, 0.15);
+  }
+  
+  tr.warning {
+    background: #E53935 !important;
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  /* Botón “volver” moderno */
+  .back-button {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 
+      transform 0.3s ease,
+      background 0.3s ease,
+      box-shadow 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background: rgba(255, 255, 255, 0.24);
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
+  }
+  
+  .back-button i {
+    font-size: 24px;
+    color: #fff;
+  }
+  
+  /* Pulso sutil */
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+  }
+  
+  .back-button {
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+  

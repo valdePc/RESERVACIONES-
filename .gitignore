@@ -1,0 +1,21 @@
+.qodo
+# Ignorar archivos de entorno
+.env
+
+# Ignorar dependencias
+node_modules/
+
+# Ignorar logs y caché
+*.log
+.cache/
+dist/
+build/
+
+# Ignorar sistema
+.DS_Store
+Thumbs.db
+$Recycle.Bin/
+
+# Otros archivos del editor
+.vscode/
+.idea/

@@ -1,0 +1,237 @@
+/* estadistica.css */
+
+/* Variables de color para mejor contraste */
+:root {
+    --bg-gradient-start: #1f2937;
+    --bg-gradient-end:   #111827;
+    --card-bg:           rgba(255, 255, 255, 0.15);
+    --card-hover-bg:     rgba(218, 233, 6, 0.855);
+    --accent-color:      #10b981;
+    --text-light:        #f9fafb;
+    --text-dark:         #111827;
+    --table-header-bg:   #10b981;
+    --table-header-color:#f9fafb;
+    --table-row-alt:     rgba(255, 255, 255, 0.05);
+}
+
+/* Fondo de la página */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text-light);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+/* Contenedor principal */
+.container {
+    margin: 20px 0;          /* menos separación vertical */
+    padding: 25%;           /* menos padding */
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 1200px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Título principal */
+.container h1 {
+    font-size: 2.4rem;       /* un poco más pequeño */
+    color: var(--accent-color);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Estadísticas rápidas */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* tarjetas más pequeñas */
+    gap: 16px;               /* menos espacio */
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 16px;           /* menos padding interno */
+    text-align: center;
+    backdrop-filter: blur(8px);
+    transition: background 0.3s, transform 0.3s;
+}
+
+.stat-card:hover {
+    background: var(--card-hover-bg);
+    transform: translateY(-5px);
+}
+
+.stat-card h2 {
+    font-size: 2rem;         /* texto más pequeño */
+    margin: 0;
+    color: var(--accent-color);
+}
+
+.stat-card p {
+    margin: 6px 0 0;
+    font-size: 0.9rem;       /* leyenda más compacta */
+    color: var(--text-light);
+}
+
+/* Títulos de secciones de gráficos */
+.chart-container h2 {
+    font-size: 1.5rem;       /* más compacto */
+    margin-bottom: 12px;
+    color: var(--accent-color);
+    text-align: center;
+}
+
+/* Contenedores de gráficos */
+.chart-container {
+    background: var(--card-bg);
+    padding: 16px;           /* menos padding */
+    border-radius: 12px;
+    margin-bottom: 30px;     /* menos espacio inferior */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Tabla de detalles */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+thead th {
+    background: var(--table-header-bg);
+    color: var(--table-header-color);
+    padding: 10px 12px;      /* menos padding */
+    font-size: 0.9rem;       /* más pequeño */
+    border-bottom: 2px solid rgba(0,0,0,0.2);
+}
+
+tbody td {
+    padding: 10px 12px;      /* menos padding */
+    color: var(--text-light);
+    font-size: 0.85rem;      /* más pequeño */
+}
+
+tbody tr:nth-child(even) {
+    background: var(--table-row-alt);
+}
+
+tbody tr:hover {
+    background: rgba(218, 233, 6, 0.855);
+   
+}
+
+/* Botón de volver */
+.back-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--accent-color);
+    color: var(--text-dark);
+    width: 50px;             /* más pequeño */
+    height: 50px;            /* más pequeño */
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;       /* más pequeño */
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    transition: background 0.3s, transform 0.3s;
+}
+
+.back-button:hover {
+    background: #059669;
+    transform: scale(1.1);
+}
+
+.back-button::before {
+    content: "←";
+    display: inline-block;
+    margin-top: -2px;
+}
+
+/* --- Botón de configuración --- */
+.settings-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 1.8rem;
+    transition: transform .2s;
+}
+
+.settings-btn:hover {
+    transform: scale(1.1);
+}
+
+/* --- Modal de configuración --- */
+.modal {
+    display: none;
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    justify-content: center; align-items: center;
+    z-index: 2000;
+}
+
+.modal.open {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+.modal h2 {
+    margin-top: 0;
+    color: var(--accent-color);
+}
+
+.config-section {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.config-section label {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.config-section input[type="file"] {
+    cursor: pointer;
+}

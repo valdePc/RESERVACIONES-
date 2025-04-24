@@ -1,212 +1,66 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso a Reservaciones</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" type="image/png" href="images/icon-192x192.png">
-    <link rel="manifest" href="manifest.json">
- <!-- Cambio de prueba -->
-
-    <style>
-        
-        body {
-            display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    font-family: 'Roboto', sans-serif;
-    color: #ffffff;
-    overflow-x: hidden; /* Evita desbordamiento horizontal */
-
-        }
-        .container {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-    text-align: center;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    width: 90%; /* Flexible para pantallas pequeñas */
-    max-width: 400px; /* No más grande que este tamaño */
-    box-sizing: border-box; /* Incluye padding y border */
-}
-
-               h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #e0e0e0;
-        }
-        img {
-            max-width: 80px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-        select, input[type="password"] {
-    width: calc(100% - 20px); /* Asegura que haya espacio dentro del padding */
-    max-width: 100%; /* Evita que sobresalgan */
-    padding: 10px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 10px;
-    font-size: 14px;
-    background: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    outline: none;
-    box-sizing: border-box; /* Incluye padding en el ancho */
-}
-        select::placeholder, input::placeholder {
-            color: #d1d1d1;
-        }
-        button {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: #ffffff;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 10px;
-            transition: background 0.3s ease;
-        }
-        button:hover {
-            background: linear-gradient(135deg, #2a5298, #1e3c72);
-        }
-        .error {
-            color: #ff6666;
-            margin-top: 10px;
-            display: none;
-        }
-        .loading {
-            display: none;
-            margin: 20px auto 0;
-        }
-        .loading div {
-            width: 12px;
-            height: 12px;
-            margin: 0 5px;
-            background: #ffffff;
-            border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out both;
-        }
-        .loading div:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-        .loading div:nth-child(2) {
-            animation-delay: -0.16s;
-        }
-        @keyframes bounce {
-            0%, 80%, 100% {
-                transform: scale(0);
-            }
-            40% {
-                transform: scale(1);
-            }
-        }
-    </style>
-    <script>
-        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-        const baseId = 'appLJWGTQ6xFXTRDl';
-        const tableName = 'Contraseñas';
-
-        document.addEventListener("DOMContentLoaded", cargarNombres);
-
-        async function cargarNombres() {
-            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${apiKey}`
-                }
-            });
-            const data = await response.json();
-
-            const nombresSelect = document.getElementById("nombres");
-            data.records.forEach(record => {
-                const option = document.createElement("option");
-                option.value = record.fields.Name;
-                option.textContent = record.fields.Name;
-                nombresSelect.appendChild(option);
-            });
-        }
-
-        async function verificarContraseña() {
-            const nombreSeleccionado = document.getElementById("nombres").value;
-            const contraseñaIngresada = document.getElementById("password").value;
-            const errorMensaje = document.getElementById("error");
-            const loadingSpinner = document.querySelector(".loading");
-
-            errorMensaje.style.display = "none";
-            loadingSpinner.style.display = "block";
-
-            try {
-                const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula={Name}='${nombreSeleccionado}'`;
-                const response = await fetch(url, {
-                    headers: {
-                        Authorization: `Bearer ${apiKey}`
-                    }
-                });
-                const data = await response.json();
-
-                loadingSpinner.style.display = "none";
-
-                if (data.records.length > 0) {
-                    const contraseñaCorrecta = data.records[0].fields.Contraseña;
-
-                    if (contraseñaIngresada === contraseñaCorrecta) {
-                        window.location.href = "agenda.html";
-                    } else {
-                        errorMensaje.textContent = "Contraseña incorrecta. Inténtalo de nuevo.";
-                        errorMensaje.style.display = "block";
-                    }
-                } else {
-                    errorMensaje.textContent = "Usuario no encontrado. Inténtalo de nuevo.";
-                    errorMensaje.style.display = "block";
-                }
-            } catch (error) {
-                loadingSpinner.style.display = "none";
-                errorMensaje.textContent = "Error al conectar con el servidor. Inténtalo más tarde.";
-                errorMensaje.style.display = "block";
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title data-i18n="login.title">Acceso a Reservaciones</title>
+  <link rel="stylesheet" href="index.css">
 </head>
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-            .then(() => console.log('Service Worker registrado con éxito'))
-            .catch((error) => console.error('Error al registrar el Service Worker:', error));
-    }
-    document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-});
-
-</script>
-
 <body>
-   
-    <div class="container">
-        <img src="images/icon-192x192.png" alt="Logo de Reservaciones" style="width: 100px; height: auto;">
-        <h1>Acceso a Reservaciones</h1>
-        
-        <select id="nombres" required>
-            <option value="" disabled selected>Seleccione su nombre</option>
-        </select>
-    
-        <input type="password" id="password" placeholder="Ingrese su contraseña" required>
-        <button onclick="verificarContraseña()">Ingresar</button>
-    
-        <div class="loading">
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
+  <div class="container">
+    <!-- Logo por defecto; si el usuario lo cambia desde Agenda, se guardará en localStorage -->
+    <img
+      id="loginLogo"
+      src="images/icon-192x192.png"
+      alt="Logo de Reservaciones"
+    >
 
-        <p id="error" class="error">Contraseña incorrecta. Inténtalo de nuevo.</p>
+    <h1 data-i18n="login.header">Acceso a Reservaciones</h1>
+
+    <select id="nombres" required>
+      <option value="" disabled selected data-i18n="login.selectDefault">Seleccione su nombre</option>
+    </select>
+
+    <div class="password-container">
+      <input
+        type="password"
+        id="password"
+        placeholder=""
+        data-i18n="login.passwordPlaceholder"
+        required
+      >
+      <button
+        type="button"
+        id="togglePassword"
+        class="toggle-password"
+        aria-label=""
+        data-i18n-aria="login.togglePasswordAria"
+      >👁️</button>
     </div>
+
+    <button id="loginBtn" data-i18n="login.button">Ingresar</button>
+
+    <div class="loading">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+
+    <p id="error" class="error" data-i18n="login.error">Contraseña incorrecta. Inténtalo de nuevo.</p>
+  </div>
+
+  <!-- traducciones -->
+  <script type="module" src="translations.js"></script>
+  <script type="module">
+    import { applyTranslations } from './translations.js';
+    window.addEventListener('DOMContentLoaded', applyTranslations);
+    window.addEventListener('storage', e => {
+      if (e.key === 'lang' || e.key === 'language') applyTranslations();
+    });
+  </script>
+  <!-- lógica login -->
+  <script type="module" src="index.js"></script>
 </body>
 </html>
+

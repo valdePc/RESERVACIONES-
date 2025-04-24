@@ -1,338 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base de Datos - Estadísticas</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title data-i18n="stats.title">Base de Datos - Estadísticas</title>
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-            backdrop-filter: blur(10px);
-            max-width: 1200px;
-            width: 90%;
-        }
+  <!-- Chart.js y plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 
-        h1 {
-            text-align: center;
-            color: #00e676;
-            margin-bottom: 20px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            flex: 1 1 300px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(15px);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: scale(1.05);
-        }
-
-        .stat-card h2 {
-            margin: 0;
-            font-size: 2.5rem;
-            color: #00e676;
-        }
-
-        .stat-card p {
-            margin: 5px 0;
-            font-size: 1.2rem;
-            color: #e0e0e0;
-        }
-
-        .chart-container {
-            margin: 20px 0;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
-
-        canvas {
-            max-width: 100%;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        th {
-            background-color: #00e676;
-            color: #1e1e1e;
-        }
-
-        td {
-            background: rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-        }
-
-        .back-button {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: linear-gradient(135deg, #ff4081, #f50057);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .back-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        .back-button::before {
-            content: "←";
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-    </style>
+  <!-- CSS externo -->
+  <link rel="stylesheet" href="estadistica.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Estadísticas de Reservaciones</h1>
-        <div class="stats">
-            <div class="stat-card">
-                <h2 id="total-reservations">0</h2>
-                <p>Total de Reservaciones</p>
-            </div>
-            <div class="stat-card">
-                <h2 id="current-occupancy">0</h2>
-                <p>Personas Ocupando Actuales</p>
-            </div>
-            <div class="stat-card">
-                <h2 id="avg-reservations">0</h2>
-                <p>Reservaciones Promedio por Día</p>
-            </div>
-            <div class="stat-card">
-                <h2 id="total-people">0</h2>
-                <p>Total de Personas Reservadas</p>
-            </div>
-            <div class="stat-card">
-                <h2 id="total-cupos">0</h2>
-                <p>Total de Cupos Reservados</p>
-            </div>
-        </div>
+  <div class="container">
+    <h1 data-i18n="stats.header">Estadísticas de Reservaciones</h1>
 
-        <div class="chart-container">
-            <h2 style="color: #00e676; text-align: center;">Reservaciones por Mes</h2>
-            <canvas id="monthlyChart"></canvas>
-        </div>
-
-        <div class="chart-container">
-            <h2 style="color: #00e676; text-align: center;">Cupos Ocupados por Ubicación</h2>
-            <canvas id="locationChart"></canvas>
-        </div>
-
-        <div class="table-container">
-            <h2 style="color: #00e676;">Detalles de Reservaciones</h2>
-            <table id="reservationsTable">
-                <thead>
-                    <tr>
-                        <th>Fecha de Registro</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                        <th>Ubicación</th>
-                        <th>Cupos</th>
-                        <th>Personas</th>
-                        <th>Contacto</th>
-                        <th>Vuelo</th>
-                        <th>Comentario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Los datos se agregarán dinámicamente -->
-                </tbody>
-            </table>
-        </div>
+    <div class="stats">
+      <div class="stat-card">
+        <h2 id="total-reservations">0</h2>
+        <p data-i18n="stats.totalReservations">Total de Reservaciones</p>
+      </div>
+      <div class="stat-card">
+        <h2 id="current-occupancy">0</h2>
+        <p data-i18n="stats.currentOccupancy">Personas Ocupando Actuales</p>
+      </div>
+      <div class="stat-card">
+        <h2 id="avg-reservations">0</h2>
+        <p data-i18n="stats.avgPerDay">Reservaciones Promedio por Día</p>
+      </div>
+      <div class="stat-card">
+        <h2 id="total-people">0</h2>
+        <p data-i18n="stats.totalPeople">Total de Personas Reservadas</p>
+      </div>
+      <div class="stat-card">
+        <h2 id="total-cupos">0</h2>
+        <p data-i18n="stats.totalCupos">Total de Cupos Reservados</p>
+      </div>
     </div>
 
-    <button class="back-button" onclick="location.href='agenda.html'"></button>
+    <div class="chart-container">
+      <h2 data-i18n="stats.chartByMonth">Reservaciones por Mes</h2>
+      <canvas id="monthlyChart"></canvas>
+    </div>
 
-    <script>
-        const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-        const baseId = 'appLJWGTQ6xFXTRDl';
-        const tableName = 'Reservas';
+    <div class="chart-container">
+      <h2 data-i18n="stats.chartByLocation">Cupos Ocupados por Ubicación</h2>
+      <canvas id="locationChart"></canvas>
+    </div>
 
-        document.addEventListener("DOMContentLoaded", async () => {
-            const data = await fetchReservations();
-            updateStats(data);
-            renderTable(data);
-            renderCharts(data);
-        });
+    <div class="table-container">
+      <h2 data-i18n="stats.detailsHeader">Detalles de Reservaciones</h2>
+      <table id="reservationsTable">
+        <thead>
+          <tr>
+            <th data-i18n="stats.thRegistro">Registro</th>
+            <th data-i18n="stats.thEntrada">Entrada</th>
+            <th data-i18n="stats.thSalida">Salida</th>
+            <th data-i18n="stats.thUbicacion">Ubicación</th>
+            <th data-i18n="stats.thCupos">Cupos</th>
+            <th data-i18n="stats.thPersonas">Personas</th>
+            <th data-i18n="stats.thContacto">Contacto</th>
+            <th data-i18n="stats.thVuelo">Vuelo</th>
+            <th data-i18n="stats.thComentario">Comentario</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Se llenará dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-        async function fetchReservations() {
-            const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${apiKey}`
-                }
-            });
-            const json = await response.json();
-            return json.records.map(record => record.fields);
-        }
+  <button class="back-button"
+          onclick="location.href='agenda.html'"
+          aria-label="Volver">
+    <i class="material-icons">arrow_back</i>
+  </button>
 
-        function updateStats(data) {
-            const totalReservations = data.length;
-            const currentOccupancy = data.reduce((sum, item) => {
-                const today = new Date();
-                const entrada = new Date(item.Entrada);
-                const salida = new Date(item.Salida);
-                if (entrada <= today && salida >= today) {
-                    return sum + (item['Número de Personas'] || 0);
-                }
-                return sum;
-            }, 0);
-            const avgReservations = (totalReservations / (new Date().getDate())).toFixed(2);
-            const totalPeople = data.reduce((sum, item) => sum + (item['Número de Personas'] || 0), 0);
-            const totalCupos = data.reduce((sum, item) => sum + (item['Número de Cupos'] || 0), 0);
-
-            document.getElementById("total-reservations").textContent = totalReservations;
-            document.getElementById("current-occupancy").textContent = currentOccupancy;
-            document.getElementById("avg-reservations").textContent = avgReservations;
-            document.getElementById("total-people").textContent = totalPeople;
-            document.getElementById("total-cupos").textContent = totalCupos;
-        }
-
-        function renderTable(data) {
-            const tableBody = document.getElementById("reservationsTable").querySelector("tbody");
-            tableBody.innerHTML = "";
-            data.forEach(item => {
-                const row = tableBody.insertRow();
-                row.insertCell().textContent = item['Fecha de Registro'] || "-";
-                row.insertCell().textContent = item.Entrada || "-";
-                row.insertCell().textContent = item.Salida || "-";
-                row.insertCell().textContent = item['Locación'] || "-";
-                row.insertCell().textContent = item['Número de Cupos'] || "-";
-                row.insertCell().textContent = item['Número de Personas'] || "-";
-                row.insertCell().textContent = item.Contacto || "-";
-                row.insertCell().textContent = item.Vuelo || "-";
-                row.insertCell().textContent = item.Comentario || "-";
-            });
-        }
-
-        function renderCharts(data) {
-            const months = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('es', { month: 'long' }));
-            const reservationsByMonth = Array(12).fill(0);
-            data.forEach(item => {
-                const month = new Date(item.Entrada).getMonth();
-                if (!isNaN(month)) reservationsByMonth[month]++;
-            });
-
-            new Chart(document.getElementById('monthlyChart'), {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Reservaciones',
-                        data: reservationsByMonth,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        title: { display: true, text: 'Reservaciones por Mes' }
-                    }
-                }
-            });
-
-            const locations = {};
-            let totalCupos = 0;
-
-            data.forEach(item => {
-                if (item['Locación'] && item['Número de Cupos'] > 0) {
-                    const location = item['Locación'];
-                    const cupos = item['Número de Cupos'];
-                    locations[location] = (locations[location] || 0) + cupos;
-                    totalCupos += cupos;
-                }
-            });
-
-            new Chart(document.getElementById('locationChart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(locations),
-                    datasets: [{
-                        label: 'Cupos',
-                        data: Object.values(locations),
-                        backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        datalabels: {
-                            formatter: (value, ctx) => {
-                                const percentage = ((value / totalCupos) * 100).toFixed(2);
-                                return `${percentage}%`;
-                            },
-                            color: '#fff',
-                            font: { weight: 'bold', size: 14 }
-                        },
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'Cupos Ocupados por Ubicación' }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-        }
-    </script>
+  <!-- 1) Traducciones -->
+  <script type="module" src="translations.js"></script>
+  <!-- 2) Inicializa i18n -->
+  <script type="module">
+    import { applyTranslations } from './translations.js';
+    window.addEventListener('DOMContentLoaded', applyTranslations);
+    window.addEventListener('storage', e => {
+      if (e.key === 'lang' || e.key === 'language') applyTranslations();
+    });
+  </script>
+  <!-- 3) Lógica de estadísticas -->
+  <script type="module" src="estadistica.js"></script>
 </body>
 </html>

@@ -1,825 +1,188 @@
-<style>
-    /* Estilos generales */
-    body {
-        font-family: 'Arial', sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background: linear-gradient(135deg, #74ebd5, #acb6e5);
-        margin: 0;
-        padding: 20px;
-        color: #333;
-    }
-
-    .container {
-        background: #ffffff;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        max-width: 900px;
-        width: 100%;
-        margin-bottom: 30px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .container:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    h1 {
-        color: #004aad;
-        font-size: 2rem;
-        margin-bottom: 20px;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .form-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        margin-bottom: 20px;
-    }
-
-    .form-group {
-        flex: 1 1 200px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    label {
-        font-size: 1rem;
-        color: #333;
-        font-weight: bold;
-    }
-
-    input, textarea {
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
-        font-size: 1rem;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-
-    input:focus, textarea:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-        outline: none;
-    }
-
-    textarea {
-        resize: vertical;
-    }
-
-    .availability {
-        color: #e65100;
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin: 20px 0;
-        padding: 15px;
-        background-color: #fff4e6;
-        border-radius: 10px;
-        text-align: center;
-        border: 1px solid #ff9800;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    button {
-        background: linear-gradient(90deg, #ff5722, #ff9800);
-        color: white;
-        padding: 12px 25px;
-        margin-top: 15px;
-        border: none;
-        border-radius: 50px;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-        width: 100%;
-        max-width: 200px;
-    }
-
-    button:hover {
-        background: linear-gradient(90deg, #ff9800, #ff5722);
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    .button-group {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-    }
-
-    .table-container {
-        margin-top: 30px;
-        width: 100%;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    th, td {
-        padding: 15px;
-        border-bottom: 1px solid #f1f1f1;
-        font-size: 1rem;
-        color: #333;
-    }
-
-    th {
-        background-color: #004aad;
-        color: white;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    tr:hover {
-        background-color: #f9f9f9;
-    }
-
-    .highlight {
-        background-color: #ffeb3b;
-    }
-
-    .highlight-entrada {
-        background-color: #d4edda; /* Verde claro */
-        font-weight: bold;
-    }
-
-    .highlight-salida {
-        background-color: #f8d7da; /* Rojo claro */
-        font-weight: bold;
-    }
-</style>
-
-
-    
-<script>
-const apiKey = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-const baseId = 'appLJWGTQ6xFXTRDl';
-const tableName = 'Reservas';
-const maxCapacity = 40;
-let availableSpaces = maxCapacity;
-
-document.addEventListener("DOMContentLoaded", () => {
-    const fechaRegistro = document.getElementById("registroFecha");
-    fechaRegistro.value = new Date().toISOString().split("T")[0];
-    fechaRegistro.readOnly = true;
-    obtenerDatosReservas();
-
-    // Agregar evento al botón de Estadística con contraseña
-    const btnEstadistica = document.getElementById("btnestadistica");
-    btnEstadistica.addEventListener("click", () => {
-        const password = prompt("Ingrese la contraseña para acceder a Estadística:");
-        if (password === "visita1234") {
-            window.location.href = 'estadistica.html'; // Cambia este enlace si es necesario
-        } else {
-            alert("Contraseña incorrecta. Acceso denegado.");
-        }
-    });
-
-    // Agregar evento al botón de BDD con contraseña
-    const btnBDD = document.getElementById("btnBDD");
-    btnBDD.addEventListener("click", () => {
-        const password = prompt("Ingrese la contraseña para acceder a BDD:");
-        if (password === "visita1234") { // Cambia la contraseña según sea necesario
-            window.location.href = 'https://airtable.com/appLJWGTQ6xFXTRDl/tblM4Q3dJjFg2DG97/viwhmRh1lHOFtEqQv?blocks=hide';
-        } else {
-            alert("Contraseña incorrecta. Acceso denegado.");
-        }
-    });
-    document.getElementById("btnTransporte").addEventListener("click", () => {
-    window.location.href = 'transporte.html';
-});
-
-});
-
-
-        
-
-async function obtenerDatosReservas() {
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-    const response = await fetch(url, {
-        headers: {
-            Authorization: `Bearer ${apiKey}`
-        }
-    });
-    const data = await response.json();
-
-    const fechaActual = new Date().toISOString().split("T")[0];
-
-    const reservasVigentes = data.records
-        .map(record => ({
-            ...record.fields,
-            id: record.id // Agregar el ID del registro
-        }))
-        .filter(reserva => 
-            new Date(reserva.Salida) >= new Date(fechaActual) && // Excluir reservas vencidas
-            reserva.Eliminados !== "Eliminado" // Excluir reservas eliminadas
-        )
-        .sort((a, b) => new Date(a.Entrada) - new Date(b.Entrada));
-
-    mostrarReservasEnTabla(reservasVigentes);
-
-    const occupiedSpaces = reservasVigentes
-        .filter(reserva => 
-            new Date(reserva.Entrada) <= new Date(fechaActual) && 
-            new Date(reserva.Salida) >= new Date(fechaActual)
-        )
-        .reduce((acc, reserva) => acc + (reserva['Número de Cupos'] || 0), 0);
-
-    verificarCapacidad(occupiedSpaces);
-}
-
-
-
-    function verificarCapacidad(occupiedSpaces) {
-        availableSpaces = maxCapacity - occupiedSpaces;
-        document.getElementById("availability").innerText = `Espacios ocupados hoy: ${occupiedSpaces} / Espacios Disponibles: ${availableSpaces}`;
-    }
-
-    async function registrarReserva() {
-        const numeroCupos = parseInt(document.getElementById("numero").value);
-
-        if (numeroCupos > availableSpaces) {
-            alert('No hay suficientes espacios disponibles para la cantidad de cupos solicitados.');
-            return;
-        }
-
-        const reserva = {
-            'Fecha de Registro': document.getElementById("registroFecha").value,
-            'Entrada': document.getElementById("Entrada").value,
-            'Salida': document.getElementById("Salida").value,
-            'Locación': document.getElementById("locacion").value,
-            'Número de Cupos': numeroCupos,
-            'Número de Personas': parseInt(document.getElementById("personas").value),
-            'Contacto': document.getElementById("contacto").value,
-            'Vuelo': document.getElementById("vuelo").value,
-            'Comentario': document.getElementById("comentario").value
-        };
-
-        if (await guardarEnAirtable(reserva)) {
-            agregarReservaATabla(reserva);
-            limpiarFormulario();
-            obtenerDatosReservas();
-        }
-    }
-
-    async function guardarEnAirtable(reserva) {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ fields: reserva })
-            });
-
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                console.log('Reserva guardada en Airtable:', jsonResponse);
-                alert('Reserva guardada en Airtable exitosamente.');
-                return true;
-            } else {
-                console.error('Error al guardar en Airtable:', response.statusText);
-                alert('Hubo un error al guardar la reserva.');
-                return false;
-            }
-        } catch (error) {
-            console.error('Error al realizar la solicitud a Airtable:', error);
-            alert('Error al conectar con Airtable.');
-            return false;
-        }
-    }
-    function agregarReservaATabla(reserva) {
-    const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
-    const nuevaFila = tableBody.insertRow();
-
-    // Función para formatear fechas a DD/MM/AA
-    const formatearFecha = (fecha) => {
-        if (!fecha) return ""; // Manejar fechas vacías
-        const [year, month, day] = fecha.split("-");
-        return `${day}/${month}/${year.slice(-2)}`;
-    };
-
-    // Almacenar el ID del registro en un atributo de datos
-    nuevaFila.setAttribute('data-id', reserva.id);
-
-    // Insertar celdas con datos formateados
-    nuevaFila.insertCell(0).innerText = formatearFecha(reserva['Fecha de Registro']);
-    nuevaFila.insertCell(1).innerText = formatearFecha(reserva.Entrada);
-    nuevaFila.insertCell(2).innerText = formatearFecha(reserva.Salida);
-    nuevaFila.insertCell(3).innerText = reserva['Locación'];
-    nuevaFila.insertCell(4).innerText = reserva['Número de Cupos'];
-    nuevaFila.insertCell(5).innerText = reserva['Número de Personas'];
-    nuevaFila.insertCell(6).innerText = reserva.Contacto;
-    nuevaFila.insertCell(7).innerText = reserva.Vuelo;
-    nuevaFila.insertCell(8).innerText = reserva.Comentario;
-
-    // Verificar si la reserva está próxima para Entrada y Salida
-    if (esReservaProxima(reserva.Entrada)) {
-        nuevaFila.classList.add('highlight-entrada'); // Clase para resaltar llegada
-    }
-    if (esReservaProxima(reserva.Salida)) {
-        nuevaFila.classList.add('highlight-salida'); // Clase para resaltar salida
-    }
-
-    // Crear botón de eliminar
-    const botonEliminar = document.createElement("button");
-    botonEliminar.innerText = "Eliminar";
-    botonEliminar.style.backgroundColor = "red";
-    botonEliminar.style.color = "white";
-    botonEliminar.style.border = "none";
-    botonEliminar.style.padding = "5px 10px";
-    botonEliminar.style.borderRadius = "5px";
-    botonEliminar.style.cursor = "pointer";
-
-    // Manejar la eliminación
-    botonEliminar.addEventListener("click", () => {
-        if (confirm("¿Estás seguro de que deseas eliminar esta reserva?")) {
-            const idReserva = reserva.id; // ID de la reserva
-            if (idReserva) {
-                marcarComoEliminado(idReserva); // Marcar como eliminado en Airtable
-            }
-            nuevaFila.remove(); // Eliminar la fila de la tabla
-        }
-    });
-
-    // Agregar el botón de eliminar en una nueva celda
-    const celdaAccion = nuevaFila.insertCell(9);
-    celdaAccion.appendChild(botonEliminar);
-
-    // Agregar evento para cargar los datos en el formulario al hacer doble clic
-    nuevaFila.addEventListener('dblclick', () => cargarReservaEnFormulario(nuevaFila, reserva));
-}
-
-    function esReservaProxima(fecha) {
-        const fechaReserva = new Date(fecha);
-        const hoy = new Date();
-        const diferenciaDias = (fechaReserva - hoy) / (1000 * 60 * 60 * 24);
-        return diferenciaDias <= 3;
-    }
-
-    function cargarReservaEnFormulario(fila, reserva) {
-    document.getElementById("Entrada").value = reserva.Entrada;
-    document.getElementById("Salida").value = reserva.Salida;
-    document.getElementById("locacion").value = reserva['Locación'];
-    document.getElementById("numero").value = reserva['Número de Cupos'];
-    document.getElementById("personas").value = reserva['Número de Personas'];
-    document.getElementById("contacto").value = reserva.Contacto;
-    document.getElementById("vuelo").value = reserva.Vuelo;
-    document.getElementById("comentario").value = reserva.Comentario;
-
-    const guardarBtn = document.querySelector("button[type='submit']");
-    guardarBtn.onclick = async (e) => {
-        e.preventDefault();
-
-        const reservaActualizada = {
-            'Entrada': document.getElementById("Entrada").value,
-            'Salida': document.getElementById("Salida").value,
-            'Locación': document.getElementById("locacion").value,
-            'Número de Cupos': parseInt(document.getElementById("numero").value),
-            'Número de Personas': parseInt(document.getElementById("personas").value),
-            'Contacto': document.getElementById("contacto").value,
-            'Vuelo': document.getElementById("vuelo").value,
-            'Comentario': document.getElementById("comentario").value
-        };
-
-        // Recuperar el ID desde el atributo data-id de la fila seleccionada
-        const idReserva = fila.getAttribute('data-id');
-
-        if (!idReserva) {
-            console.error("ID del registro no encontrado");
-            alert("No se puede actualizar, ID no encontrado.");
-            return;
-        }
-
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${idReserva}`;
-
-        try {
-            const response = await fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    Authorization: `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ fields: reservaActualizada })
-            });
-
-            if (response.ok) {
-                alert('Reserva actualizada correctamente en Airtable.');
-
-                fila.cells[1].innerText = reservaActualizada.Entrada || '';
-                fila.cells[2].innerText = reservaActualizada.Salida || '';
-                fila.cells[3].innerText = reservaActualizada['Locación'] || '';
-                fila.cells[4].innerText = reservaActualizada['Número de Cupos'] || '';
-                fila.cells[5].innerText = reservaActualizada['Número de Personas'] || '';
-                fila.cells[6].innerText = reservaActualizada.Contacto || '';
-                fila.cells[7].innerText = reservaActualizada.Vuelo || '';
-                fila.cells[8].innerText = reservaActualizada.Comentario || '';
-            } else {
-                console.error('Error al actualizar en Airtable:', response.statusText);
-                alert('Hubo un error al actualizar la reserva.');
-            }
-        } catch (error) {
-            console.error('Error al conectar con Airtable:', error);
-            alert('Error al conectar con Airtable.');
-        }
-        function esReservaProxima(fecha) {
-    const fechaReserva = new Date(fecha);
-    const hoy = new Date();
-    const diferenciaDias = (fechaReserva - hoy) / (1000 * 60 * 60 * 24); // Convertir milisegundos a días
-    return diferenciaDias >= 0 && diferenciaDias <= 3; // Dentro de los próximos 3 días
-    
-}
-
-    };
-}
-
-
-
-
-
-
-    function limpiarFormulario() {
-        document.getElementById("Entrada").value = "";
-        document.getElementById("Salida").value = "";
-        document.getElementById("locacion").value = "";
-        document.getElementById("numero").value = "";
-        document.getElementById("personas").value = "";
-        document.getElementById("contacto").value = "";
-        document.getElementById("vuelo").value = "";
-        document.getElementById("comentario").value = "";
-    }
-
-    async function mostrarEntradas() {
-        const reservas = await obtenerReservasDesdeAirtable();
-        const fechaActual = new Date();
-
-        const reservasEntradas = reservas.filter(reserva => new Date(reserva.Entrada) >= fechaActual);
-        mostrarReservasEnTabla(reservasEntradas);
-    }
-
-    async function mostrarSalidas() {
-        const reservas = await obtenerReservasDesdeAirtable();
-        const fechaActual = new Date();
-
-        const reservasSalidas = reservas.filter(reserva => {
-            const fechaEntrada = new Date(reserva.Entrada);
-            const fechaSalida = new Date(reserva.Salida);
-            return fechaEntrada < fechaActual && fechaSalida >= fechaActual;
-        });
-        mostrarReservasEnTabla(reservasSalidas);
-    }
-    async function verificarDisponibilidad() {
-    const fechaEntrada = prompt("Ingrese la fecha de entrada (DD/MM/AA o DD-MM-AA):");
-    const fechaSalida = prompt("Ingrese la fecha de salida (DD/MM/AA o DD-MM-AA):");
-    const cuposSolicitados = parseInt(prompt("Ingrese la cantidad de cupos que necesita:"));
-
-    if (!fechaEntrada || !fechaSalida || isNaN(cuposSolicitados)) {
-        alert("Datos ingresados inválidos. Por favor, intente nuevamente.");
-        return;
-    }
-
-    // Función para limpiar y convertir fechas al formato ISO
-    const formatearFechaISO = (fecha) => {
-        const fechaLimpiada = fecha.replace(/[-/]/g, ""); // Elimina separadores
-        const [dia, mes, año] = [fechaLimpiada.slice(0, 2), fechaLimpiada.slice(2, 4), fechaLimpiada.slice(4)];
-        return `20${año}-${mes}-${dia}`;
-    };
-
-    const fechaInicio = new Date(formatearFechaISO(fechaEntrada));
-    const fechaFin = new Date(formatearFechaISO(fechaSalida));
-
-    const reservas = await obtenerReservasEnRango(fechaInicio, fechaFin);
-
-    // Procesar disponibilidad por días
-    let diasConDisponibilidad = [];
-    let diasSinDisponibilidad = [];
-    let rangoActual = null;
-    let disponibilidadActual = null;
-
-    for (let fecha = fechaInicio; fecha <= fechaFin; fecha.setDate(fecha.getDate() + 1)) {
-        const fechaConsulta = fecha.toISOString().split("T")[0];
-        const reservasDelDia = reservas[fechaConsulta] || 0; // Cargar reservas o 0 si no hay
-        const cuposDisponibles = maxCapacity - reservasDelDia;
-
-        const nuevaDisponibilidad = cuposSolicitados <= cuposDisponibles;
-        const fechaFormateada = fechaConsulta.split("-").reverse().join("/");
-
-        if (nuevaDisponibilidad !== disponibilidadActual) {
-            if (rangoActual) {
-                if (disponibilidadActual) {
-                    diasConDisponibilidad.push(rangoActual);
-                } else {
-                    diasSinDisponibilidad.push(rangoActual);
-                }
-            }
-            rangoActual = [fechaFormateada];
-            disponibilidadActual = nuevaDisponibilidad;
-        } else {
-            rangoActual[1] = fechaFormateada;
-        }
-    }
-
-    // Agregar el último rango
-    if (rangoActual) {
-        if (disponibilidadActual) {
-            diasConDisponibilidad.push(rangoActual);
-        } else {
-            diasSinDisponibilidad.push(rangoActual);
-        }
-    }
-
-    // Construir mensaje para el usuario
-    let mensaje = "";
-
-    if (diasConDisponibilidad.length > 0) {
-        mensaje += "Fechas con disponibilidad:\n";
-        diasConDisponibilidad.forEach(rango => {
-            mensaje += `- Del ${rango[0]} al ${rango[1] || rango[0]} hay disponibilidad suficiente.\n`;
-        });
-    }
-
-    if (diasSinDisponibilidad.length > 0) {
-        mensaje += "\nFechas SIN disponibilidad:\n";
-        diasSinDisponibilidad.forEach(rango => {
-            mensaje += `- Del ${rango[0]} al ${rango[1] || rango[0]} no hay disponibilidad suficiente.\n`;
-        });
-    }
-
-    if (!mensaje) {
-        mensaje = "No se encontró disponibilidad para el rango de fechas especificado.";
-    }
-
-    alert(mensaje);
-}
-
-async function obtenerReservasEnRango(fechaInicio, fechaFin) {
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-    const response = await fetch(url, {
-        headers: {
-            Authorization: `Bearer ${apiKey}`
-        }
-    });
-
-    const data = await response.json();
-
-    // Mapear las reservas por fecha
-    const reservasPorFecha = {};
-    data.records.forEach(record => {
-        const entrada = record.fields.Entrada;
-        const salida = record.fields.Salida;
-        const cupos = record.fields["Número de Cupos"] || 0;
-
-        if (!entrada || !salida) return;
-
-        let fechaActual = new Date(entrada);
-        const fechaSalida = new Date(salida);
-
-        while (fechaActual <= fechaSalida) {
-            const fechaConsulta = fechaActual.toISOString().split("T")[0];
-            reservasPorFecha[fechaConsulta] = (reservasPorFecha[fechaConsulta] || 0) + cupos;
-            fechaActual.setDate(fechaActual.getDate() + 1);
-        }
-    });
-
-    console.log("Reservas por fecha:", reservasPorFecha); // Depuración
-    return reservasPorFecha;
-}
-
-
-
-        diasConDisponibilidad.forEach(rango => {
-            const inicio = rango[0];
-            const fin = rango[rango.length - 1];
-            if (inicio === fin) {
-                mensaje += `El día ${inicio} hay disponibilidad suficiente.\n`;
-            } else {
-                mensaje += `Del ${inicio} al ${fin} hay disponibilidad suficiente.\n`;
-            }
-        });
-
-        diasSinDisponibilidad.forEach(rango => {
-            const inicio = rango[0];
-            const fin = rango[rango.length - 1];
-            if (inicio === fin) {
-                mensaje += `El día ${inicio} no hay disponibilidad suficiente.\n`;
-            } else {
-                mensaje += `Del ${inicio} al ${fin} no hay disponibilidad suficiente.\n`;
-            }
-        });
-
-        if (!mensaje) {
-            mensaje = "No se encontró disponibilidad para el rango de fechas especificado.";
-        }
-
-        alert(mensaje);
-
-    async function obtenerReservasPorFecha(fecha) {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${apiKey}`
-            }
-        });
-        const data = await response.json();
-        return data.records.map(record => record.fields).filter(reserva => reserva.Entrada === fecha);
-    }
-
-    async function obtenerReservasDesdeAirtable() {
-        const url = `https://api.airtable.com/v0/${baseId}/${tableName}`;
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${apiKey}`
-            }
-        });
-        const data = await response.json();
-        return data.records.map(record => record.fields);
-    }
-
-    function mostrarReservasEnTabla(reservasFiltradas) {
-        const tableBody = document.getElementById("reservasTabla").getElementsByTagName("tbody")[0];
-        tableBody.innerHTML = "";
-
-        reservasFiltradas.forEach(reserva => {
-            agregarReservaATabla(reserva);
-        });
-    }
-    async function marcarComoEliminado(reservaId) {
-    if (!reservaId) {
-        console.error("ID de la reserva no proporcionado.");
-        return;
-    }
-
-    const url = `https://api.airtable.com/v0/${baseId}/${tableName}/${reservaId}`;
-    const body = {
-        fields: {
-            Eliminados: "Eliminado" // Asegúrate de usar el nombre exacto de la opción en Airtable
-        }
-    };
-
-    try {
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                Authorization: `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
-
-        if (response.ok) {
-            alert("Reserva marcada como eliminada en Airtable.");
-            console.log("Actualización exitosa:", await response.json());
-        } else {
-            const errorDetails = await response.json();
-            console.error("Error al marcar como eliminado:", errorDetails);
-            alert("No se pudo marcar como eliminada. Verifica los detalles en la consola.");
-        }
-    } catch (error) {
-        console.error("Error al conectar con Airtable:", error);
-        alert("Error al conectar con Airtable para marcar como eliminado.");
-    }
-}
-
-
-</script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="agenda.headerTitle">Agenda de Reservaciones</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="agenda.css">
+  <link rel="stylesheet" href="bot.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script defer src="bot.js"></script>
+<script type="module" defer src="translations.js"></script>
+<script type="module" defer src="agenda.js"></script>
+<script type="module" defer src="estadistica.js"></script>
+<script type="module" defer src="transporte.js"></script>
 
 </head>
 <body>
-    <div class="container">
-        <h1>Agenda de Reservaciones</h1>
-        <form id="reservaForm" onsubmit="registrarReserva(); return false;">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="registroFecha">Fecha de registro</label>
-                    <input type="date" id="registroFecha" required readonly>
-                </div>
-                <div class="form-group">
-                    <label for="Entrada">Entrada</label>
-                    <input type="date" id="Entrada" required>
-                </div>
-                <div class="form-group">
-                    <label for="Salida">Salida</label>
-                    <input type="date" id="Salida" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="locacion">Ubicacion NPH</label>
-                    <input type="text" id="locacion" placeholder="Ingrese la Ubicacion" required>
-                </div>
-                <div class="form-group">
-                    <label for="numero">Número de Cupos</label>
-                    <input type="number" id="numero" placeholder="Ingrese el número de cupos" required min="1">
-                </div>
-                <div class="form-group">
-                    <label for="personas">Número de Personas</label>
-                    <input type="number" id="personas" placeholder="Ingrese el número de personas" required min="1">
-                </div>
-                <div class="form-group">
-                    <label for="contacto">Contacto</label>
-                    <input type="text" id="contacto" placeholder="Nombre del contacto" required>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="vuelo">Vuelo</label>
-                    <input type="text" id="vuelo" placeholder="Número de vuelo">
-                </div>
-                <div class="form-group">
-                    <label for="comentario">Comentario</label>
-                    <textarea id="comentario" rows="2" placeholder="Escriba un comentario"></textarea>
-                </div>
-            </div>
-            <p id="availability" class="availability">Espacios ocupados: 0 / Espacio Disponibles: 40</p>
-            <div class="button-group">
-                <button type="submit">Guardar</button>
-                <button type="button" onclick="mostrarEntradas()">Entradas</button>
-                <button type="button" onclick="mostrarSalidas()">Salidas</button>
-                <button type="button" onclick="verificarDisponibilidad()">Disponibilidad</button>
-            </div>
-            <div id="estadisticaSection" class="container" style="display: none;">
-                <h1>Estadísticas de Reservaciones</h1>
-                <p>Aquí podrás ver las estadísticas detalladas de las reservas realizadas.</p>
-                <!-- Agrega más contenido o gráficos de estadísticas según sea necesario -->
-            </div>
-            
-        </form>
-        <div style="text-align: center; margin-top: 50px;">
-            <button id="btnestadistica" style="
-                background-color: green; 
-                color: white; 
-                padding: 10px 20px; 
-                border: none; 
-                border-radius: 50px; 
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                cursor: pointer;
-                font-size: 16px;">
-                Estadística
-            </button>
+  <header class="site-header">
+    <h1 data-i18n="agenda.headerTitle"></h1>
+    <div class="settings-container">
+      <button id="settingsBtn"
+      class="settings-btn"
+      aria-label="Configuración"
+      aria-expanded="false">
+<span class="material-icons">settings</span>
+</button>
 
-            <button id="btnBDD" style="
-            background-color: blue; 
-            color: white; 
-            padding: 10px 20px; 
-            border: none; 
-            border-radius: 50px; 
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            font-size: 16px;">
-            BDD
-        </button>
+      
+<ul id="settingsMenu" class="settings-menu">
+  <li class="settings-switch">
+          <span data-i18n="agenda.textChangeTheme"></span>
+          <label class="switch">
+            <input type="checkbox" id="toggleThemeSwitch">
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li>
+          <button id="changePwdBtn" class="settings-item settings-item--icon">
+            <span class="material-icons">lock</span>
+            <span data-i18n="agenda.buttonUpdatePassword"></span>
+          </button>
+        </li>
+        <li class="settings-switch">
+          <span data-i18n="agenda.textLogout"></span>
+          <label class="switch">
+            <input type="checkbox" id="logoutSwitch">
+            <span class="slider"></span>
+          </label>
+        </li>
+        <li>
+          <label for="languageSelect" data-i18n="agenda.labelLanguage"></label>
+          <select id="languageSelect">
+            <option value="es" data-i18n="agenda.optionSpanish"></option>
+            <option value="en" data-i18n="agenda.optionEnglish"></option>
+            <option value="de" data-i18n="agenda.optionGerman"></option>
+          </select>
+        </li>
+      </ul>
+    </div>
+  </header>
 
-        <button id="btnTransporte" style="
-        background-color: orange; 
-        color: white; 
-        padding: 10px 20px; 
-        border: none; 
-        border-radius: 50px; 
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-        font-size: 16px;">
-        Transporte
-    </button>
-</div>
+  <main>
+    <section class="form-section container">
+      <form id="reservaForm">
+        <fieldset class="form-group">
+          <legend data-i18n="agenda.legendDates"></legend>
+          <div class="form-row">
+            <div>
+              <label for="registroFecha" data-i18n="agenda.labelRegistroDate"></label>
+              <input type="date" id="registroFecha" required readonly>
+            </div>
+            <div>
+              <label for="Entrada" data-i18n="agenda.labelEntrada"></label>
+              <input type="date" id="Entrada" required>
+            </div>
+            <div>
+              <label for="Salida" data-i18n="agenda.labelSalida"></label>
+              <input type="date" id="Salida" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend data-i18n="agenda.legendDetails"></legend>
+          <div class="form-row">
+            <div>
+              <label for="locacion" data-i18n="agenda.labelLocation"></label>
+              <input type="text" id="locacion" placeholder="" data-i18n="agenda.placeholderLocation" required>
+            </div>
+            <div>
+              <label for="numero" data-i18n="agenda.labelCupos"></label>
+              <input type="number" id="numero" placeholder="" data-i18n="agenda.placeholderCupos" required min="1">
+            </div>
+            <div>
+              <label for="personas" data-i18n="agenda.labelPersonas"></label>
+              <input type="number" id="personas" placeholder="" data-i18n="agenda.placeholderPersonas" required min="1">
+            </div>
+            <div>
+              <label for="contacto" data-i18n="agenda.labelContacto"></label>
+              <input type="text" id="contacto" placeholder="" data-i18n="agenda.placeholderContacto" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend data-i18n="agenda.legendAdditional"></legend>
+          <div class="form-row">
+            <div>
+              <label for="vuelo" data-i18n="agenda.labelVuelo"></label>
+              <input type="text" id="vuelo" placeholder="" data-i18n="agenda.placeholderVuelo">
+            </div>
+            <div>
+              <label for="comentario" data-i18n="agenda.labelComentario"></label>
+              <textarea id="comentario" rows="2" placeholder="" data-i18n="agenda.placeholderComentario"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="availability-container">
+          <p id="availability" class="availability-text" data-i18n="agenda.availabilityText" data-args="[0,40]"></p>
+          <div class="availability-bar">
+            <div class="availability-fill"></div>
+          </div>
         </div>
-    </div>
 
-    <div class="table-container">
-        <h2>Estado de Reservaciones</h2>
+        <div class="form-actions">
+          <button type="submit" class="btn primary" data-i18n="agenda.buttonSave"></button>
+          <button type="button" id="btnEntradas" class="btn secondary" data-i18n="agenda.buttonEntradas"></button>
+          <button type="button" id="btnSalidas" class="btn secondary" data-i18n="agenda.buttonSalidas"></button>
+          <button type="button" id="btnDisponibilidad" class="btn secondary" data-i18n="agenda.buttonAvailability"></button>
+        </div>
+      </form>
+    </section>
+
+    <nav class="control-buttons container">
+      <button id="btnestadistica" class="btn accent" data-i18n="agenda.navStatistics"></button>
+      <button id="btnBDD" class="btn accent" data-i18n="agenda.navBDD"></button>
+      <button id="btnTransporte" class="btn accent" data-i18n="agenda.navTransport"></button>
+    </nav>
+
+    <section class="table-section container">
+      <h2 data-i18n="agenda.tableTitle"></h2>
+      <div class="table-container">
         <table id="reservasTabla">
-            <thead>
-                <tr>
-                    <th>Fecha de Registro</th>
-                    <th>Entradas</th>
-                    <th>Salidas</th>
-                    <th>Ubicaciones (NPH)</th>
-                    <th>Número de Cupos</th>
-                    <th>Número de Personas</th>
-                    <th>Contactos</th>
-                    <th>Vuelos</th>
-                    <th>Comentarios</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Las filas se agregarán dinámicamente aquí -->
-            </tbody>
+          <thead>
+            <tr>
+              <th data-i18n="agenda.thRegistro"></th>
+              <th data-i18n="agenda.thEntrada"></th>
+              <th data-i18n="agenda.thSalida"></th>
+              <th data-i18n="agenda.thUbicacion"></th>
+              <th data-i18n="agenda.thCupos"></th>
+              <th data-i18n="agenda.thPersonas"></th>
+              <th data-i18n="agenda.thContacto"></th>
+              <th data-i18n="agenda.thVuelo"></th>
+              <th data-i18n="agenda.thComentario"></th>
+              <th data-i18n="agenda.thAccion"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Filas dinámicas -->
+          </tbody>
         </table>
-    </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p data-i18n="agenda.footer"></p>
+  </footer>
+
+  <!-- Chat Widget (único, antes de los scripts) -->
+  <div id="chat-widget">
+    <div id="chat-header">🤖 Asistente</div>
+    <div id="chat-body"></div>
+    <form id="chat-form">
+      <input type="text" id="chat-input" placeholder="Escribe tu pregunta…" autocomplete="off" />
+      <button type="button" id="mic-btn" aria-label="Grabar audio 🎙️">🎤</button>
+      <button type="submit" id="send-btn" style="display: none;" aria-label="Enviar mensaje">➤</button>
+     <button id="tts-btn" title="Activar/Desactivar voz">🔇</button>
+
+    </form>
+  </div>
+  
 </body>
 </html>
+
