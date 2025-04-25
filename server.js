@@ -64,7 +64,7 @@ function extractDatos(text) {
 
 // 5) Función para guardar una reserva en Airtable
 async function guardarReservaEnAirtable({ nombre, fechaISO, personas, mensaje }) {
-  const airtableBaseId = process.env.BASE_ID || 'appLJWGTQ6xFXTRDl';
+  const airtableBaseId = process.env.AIRTABLE_BASE_ID || 'appLJWGTQ6xFXTRDl';
   const tableName      = 'Reservas';
   const url            = `https://api.airtable.com/v0/${airtableBaseId}/${encodeURIComponent(tableName)}`;
 

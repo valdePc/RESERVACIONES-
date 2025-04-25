@@ -1,8 +1,8 @@
 // estadistica.js
 import { t } from './translations.js';  // asume translations.js exporta la función t()
 
-const apiKey    = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-const baseId    = 'appLJWGTQ6xFXTRDl';
+const apiKey    = window._env.AIRTABLE_API_KEY;
+const baseId    = window._env.AIRTABLE_BASE_ID;
 const tableName = 'Reservas';
 
 document.addEventListener("DOMContentLoaded", async () => {

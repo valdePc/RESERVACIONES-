@@ -1,13 +1,12 @@
-import { applyTranslations } from './translations.js';
+import { applyTranslations, setLanguage } from './translations.js';
 
-const apiKey    = process.env.AIRTABLE_API_KEY;
-const baseId    = process.env.BASE_ID;
+const apiKey    = window._env.AIRTABLE_API_KEY;
+const baseId    = window._env.AIRTABLE_BASE_ID;
 const tableName     = 'Reservas';
 const authTableName = 'Contraseñas';
 const maxCapacity   = 40;
 let availableSpaces = maxCapacity;
 
-import { setLanguage } from './translations.js';
 
 document.addEventListener("DOMContentLoaded", () => {
   // 1) Traducciones
