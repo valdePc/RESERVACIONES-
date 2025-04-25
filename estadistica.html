@@ -6,6 +6,12 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title data-i18n="stats.title">Base de Datos - Estadísticas</title>
 
+  <script>
+    window._env = {
+      AIRTABLE_API_KEY: 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0',
+      AIRTABLE_BASE_ID:  'appLJWGTQ6xFXTRDl'
+    };
+  </script>
   <!-- Chart.js y plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -90,12 +96,12 @@
     });
     
   </script>
-  <!-- 2b) Define URL de Railway -->
-  <script>
-    window._env = {
-      chatApiUrl: 'https://reservaciones-production-cab9.up.railway.app/api/chat'
-    };
+  <script>  
+    window._env = {  
+      chatApiUrl: 'https://TU_APP_ON_RAILWAY.up.railway.app'  
+    };  
   </script>
+  
   <!-- 3) Lógica de estadísticas -->
   <script type="module" src="estadistica.js"></script>
 </body>
