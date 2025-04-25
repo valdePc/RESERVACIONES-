@@ -236,7 +236,45 @@ if (tabla) {
         appendBot(lista);
         return;
       }
-      
+          // —————— Búsqueda por contacto (añadir *antes* del try { … } principal) ——————
+    if (/^(?:datos del contacto|contacto|buscar contacto)/i.test(normalized)) {
+      // extrae nombre tras los dos puntos o la palabra
+      let contacto = text.split(":")[1]?.trim();
+      if (!contacto) {
+        // si no vino con “:”, quita la palabra clave
+        contacto = normalized.replace(/^(?:datos del contacto|contacto|buscar contacto)\s*/i, "");
+      }
+      appendBot(`🔍 Buscando registros de “${contacto}”…`);
+      try {
+        const registros = await fetchReservasPorContacto(contacto.toLowerCase());
+        if (!registros.length) {
+          appendBot(`No encontré registros para “${contacto}”.`);
+        } else {
+          // reutiliza tu tabla de reservas
+          const tbody = document.getElementById("reservasTabla").tBodies[0];
+          tbody.innerHTML = "";
+          const fmt = d => d ? d.split("-").reverse().join("/") : "";
+          registros.forEach(r => {
+            const row = tbody.insertRow();
+            row.insertCell().innerText = fmt(r["Fecha de Registro"]);
+            row.insertCell().innerText = fmt(r.Entrada);
+            row.insertCell().innerText = fmt(r.Salida);
+            row.insertCell().innerText = r.Locación;
+            row.insertCell().innerText = r["Número de Cupos"];
+            row.insertCell().innerText = r["Número de Personas"];
+            row.insertCell().innerText = r.Contacto;
+            row.insertCell().innerText = r.Vuelo;
+            row.insertCell().innerText = r.Comentario;
+          });
+          appendBot("✅ Listo, los datos están en la tabla.");
+        }
+      } catch (err) {
+        console.error(err);
+        appendBot("❌ Error al buscar contacto.");
+      }
+      return;  // salimos sin llamar al AI
+    }
+
 
     try {
     //  appendBot("Buscando datos en Airtable…", "info");
