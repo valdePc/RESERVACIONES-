@@ -7,7 +7,8 @@ const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // 1) Leer .env
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config();
+
 console.log('🔑 GEMINI_API_KEY   =', process.env.GEMINI_API_KEY);
 console.log('🔑 AIRTABLE_API_KEY =', process.env.AIRTABLE_API_KEY);
 
@@ -63,7 +64,7 @@ function extractDatos(text) {
 
 // 5) Función para guardar una reserva en Airtable
 async function guardarReservaEnAirtable({ nombre, fechaISO, personas, mensaje }) {
-  const airtableBaseId = process.env.AIRTABLE_BASE_ID || 'appLJWGTQ6xFXTRDl';
+  const airtableBaseId = process.env.BASE_ID || 'appLJWGTQ6xFXTRDl';
   const tableName      = 'Reservas';
   const url            = `https://api.airtable.com/v0/${airtableBaseId}/${encodeURIComponent(tableName)}`;
 

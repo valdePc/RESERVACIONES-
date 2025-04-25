@@ -1,8 +1,8 @@
 // transporte.js
 
 // Asegúrate de haber cargado translations.js antes de este script
-const apiKey    = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-const baseId    = 'appLJWGTQ6xFXTRDl';
+const apiKey = window._env.AIRTABLE_API_KEY
+const baseId = window._env.AIRTABLE_BASE_ID
 const tableName = 'Transporte';
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title data-i18n="agenda.headerTitle">Agenda de Reservaciones</title>
-
-  <!-- Estilos -->
-  <link rel="stylesheet" href="agenda.css">
-  <link rel="stylesheet" href="bot.css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script defer src="bot.js"></script>
-<script type="module" defer src="translations.js"></script>
-<script type="module" defer src="agenda.js"></script>
-<script type="module" defer src="estadistica.js"></script>
-<script type="module" defer src="transporte.js"></script>
-
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title data-i18n="agenda.headerTitle">Agenda de Reservaciones</title>
+  
+    <!-- Estilos -->
+    <link rel="stylesheet" href="agenda.css">
+    <link rel="stylesheet" href="bot.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+    <!-- 1) Inyectar variables de Railway en el cliente -->
+    <script>
+      window._env = {
+        AIRTABLE_API_KEY: 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0',
+        AIRTABLE_BASE_ID:  'appLJWGTQ6xFXTRDl'
+      };
+    </script>
+  
+    <!-- 2) Tus scripts, en defer/module para que usen window._env -->
+    <script defer src="bot.js"></script>
+    <script type="module" defer src="translations.js"></script>
+    <script type="module" defer src="agenda.js"></script>
+    <script type="module" defer src="estadistica.js"></script>
+    <script defer src="transporte.js"></script>
+  </head>
+  
 <body>
   <header class="site-header">
     <h1 data-i18n="agenda.headerTitle"></h1>

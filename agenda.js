@@ -1,7 +1,7 @@
 import { applyTranslations } from './translations.js';
 
-const apiKey        = 'patL0v30ZFJzTux8W.c464296609147a785c6cfd6ccb96863088259df68518b69e56000c44eb73f0f0';
-const baseId        = 'appLJWGTQ6xFXTRDl';
+const apiKey    = process.env.AIRTABLE_API_KEY;
+const baseId    = process.env.BASE_ID;
 const tableName     = 'Reservas';
 const authTableName = 'Contraseñas';
 const maxCapacity   = 40;
