@@ -362,3 +362,29 @@ async function obtenerReservasEnRango(start, end) {
 window.mostrarEntradas = mostrarEntradas;
 window.mostrarSalidas = mostrarSalidas;
 window.verificarDisponibilidad = verificarDisponibilidad;
+
+// —————— Búsqueda por contacto ——————
+async function mostrarPorContacto(contacto) {
+  // construye la fórmula para Airtable
+  const keyword = contacto.trim().toLowerCase();
+  const formula = `FIND('${keyword}', LOWER({Contacto}))`;
+  const url = `https://api.airtable.com/v0/${baseId}/${tableName}?filterByFormula=${encodeURIComponent(formula)}`;
+
+  const resp = await fetch(url, {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+  if (!resp.ok) throw new Error(`Airtable error ${resp.status}`);
+  const { records } = await resp.json();
+  const registros = records.map(r => ({ ...r.fields, id: r.id }));
+
+  // reutiliza tu función de pintar tabla
+  mostrarReservasEnTabla(registros);
+}
+
+// Hazla accesible globalmente para bot.js
+window.mostrarPorContacto = mostrarPorContacto;
+
+window.mostrarEntradas       = mostrarEntradas;
+window.mostrarSalidas        = mostrarSalidas;
+window.verificarDisponibilidad = verificarDisponibilidad;
+window.mostrarPorContacto    = mostrarPorContacto;
