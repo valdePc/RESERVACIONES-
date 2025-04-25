@@ -4,7 +4,7 @@ const baseId          = window._env.AIRTABLE_BASE_ID;
 const airtableBaseUrl = `https://api.airtable.com/v0/${baseId}`;
 
 // URL absoluta del endpoint de tu backend
-const chatUrl         = window._env.CHAT_API_URL || "/api/chat";
+const chatUrl= window._env.CHAT_API_URL || "/api/chat";
 
 // —————— Arriba de todo en bot.js ——————
 // —————— Inicio de bot.js ——————
