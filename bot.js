@@ -3,7 +3,8 @@ const apiKey          = window._env.AIRTABLE_API_KEY;
 const baseId          = window._env.AIRTABLE_BASE_ID;
 const airtableBaseUrl = `https://api.airtable.com/v0/${baseId}`;
 
-// —————— El resto de tu bot.js sigue igual ——————
+// URL absoluta del endpoint de tu backend
+const chatUrl         = window._env.CHAT_API_URL || "/api/chat";
 
 // —————— Arriba de todo en bot.js ——————
 // —————— Inicio de bot.js ——————
@@ -250,7 +251,7 @@ if (tabla) {
         { role: "system", content: `Reservas: ${JSON.stringify(reservas)}` }
       ];
 
-      const resp = await fetch("/api/chat", {
+      const resp = await fetch(chatUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
