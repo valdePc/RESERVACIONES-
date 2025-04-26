@@ -80,6 +80,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
   header.addEventListener("click", () => widget.classList.toggle("open"));
+// —————— Loader “Cargando…” ——————
+const loader = document.createElement("div");
+loader.id = "chat-loader";
+loader.style.cssText = `
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  font-style: italic;
+  display: none;
+  z-index: 1000;
+`;
+loader.innerText = "Cargando…";
+widget.appendChild(loader);
+
+function showLoader() { loader.style.display = "block"; }
+function hideLoader() { loader.style.display = "none"; }
 
   input.addEventListener("input", () => {
     const hayTexto = input.value.trim().length > 0;
@@ -281,8 +298,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // — FILTRO LIBRE POR CONTACTO —
-    if (/^[A-Za-zÁÉÍÓÚáéíóúñÑÜü ]+$/.test(normalized)) {
+   // — FILTRO LIBRE POR CONTACTO —
+if (/^[A-Za-zÁÉÍÓÚáéíóúñÑÜü ]+$/.test(normalized)) {
+
      // appendBot(`🔍 Buscando reservas para: ${text}…`);
       try {
         const regs = await fetchReservasPorContacto(text);
@@ -307,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchAirtable("Reservas")
       ]);
       const systemMsg = [
-        { role: "system", content: "Asistente de reservas multilingüe conectado a Airtable." },
+        { role: "system", content: "Asistente de reservas multilingüe en desarrollo por Valde, para facilitar el trabajo de reservas de cupos de OWS y NPH a cargo de Anna del departamento de padrinos, - Hablas siempre en un español claro y cordial (salvo que detectes que el usuario escribe en inglés o alemán,puedes incluir emogis en ocaciones.Si se trata de una consulta de reservas, busca primero en Airtable; si no encuentras nada, ofrece que se comuniguen con valde al +18098122663 para que te actualicen y puedas hacer esa funcion." },
         { role: "system", content: `Transporte: ${JSON.stringify(transporte)}` },
         { role: "system", content: `Reservas: ${JSON.stringify(reservas)}` }
       ];
